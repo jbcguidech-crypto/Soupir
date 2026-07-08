@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0f1a1a">
+<title>Souffle · Respiration fonctionnelle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1a1a; --bg2:#13201f; --card:#17282a; --card2:#1c3133;
+  --ink:#e9f1ee; --mut:#8aa6a2; --faint:#5f7c79;
+  --teal:#2db6a4; --tealD:#1f8f86; --teal2:#0f655c;
+  --amber:#e0922f; --amberD:#b87328;
+  --danger:#d65a40; --dangerBg:#3a201a;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,sans-serif;overscroll-behavior:none}
+body{min-height:100vh}
+.display{font-family:"Fraunces",Georgia,serif}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:500;margin:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;
+  background:radial-gradient(1200px 500px at 50% -10%, #16302e 0%, var(--bg) 60%)}
+.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;backdrop-filter:blur(8px);background:linear-gradient(var(--bg),rgba(15,26,26,.7))}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Fraunces";font-size:19px;letter-spacing:.3px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--teal),var(--teal2));box-shadow:0 0 14px var(--tealD)}
+.boltchip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);
+  padding:7px 12px;border-radius:999px;font-size:13px}
+.boltchip b{font-family:"Fraunces";font-size:15px}
+.boltchip small{color:var(--mut);font-size:11px}
+.view{flex:1;padding:6px 18px 120px;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.kicker{color:var(--teal);font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:600}
+.lead{color:var(--mut);font-size:14px;line-height:1.55}
+.h-hero{font-size:30px;line-height:1.1;margin:6px 0 4px}
+.section-t{font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut);font-weight:600;margin:22px 2px 10px}
+.card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);
+  border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.bolt-card{margin-top:10px;position:relative;overflow:hidden}
+.bolt-card .ring{position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%, rgba(45,182,164,.22), transparent 60%)}
+.bolt-num{font-family:"Fraunces";font-size:52px;line-height:1;display:flex;align-items:baseline;gap:8px}
+.bolt-num span{font-size:18px;color:var(--mut)}
+.zone-pill{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.row{display:flex;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:13px;
+  padding:13px 16px;font-weight:600;font-size:15px;background:var(--card2);border:1px solid var(--line2);color:var(--ink);transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(180deg,var(--teal),var(--tealD));border:none;color:#04201d}
+.btn.amber{background:linear-gradient(180deg,var(--amber),var(--amberD));border:none;color:#241405}
+.btn.ghost{background:transparent}
+.btn.block{width:100%}
+.btn.sm{padding:9px 13px;font-size:13.5px;border-radius:10px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.tile{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:16px;
+  padding:15px;text-align:left;position:relative;min-height:104px;display:flex;flex-direction:column;justify-content:space-between}
+.tile .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px}
+.tile h3{font-size:17px;margin-top:10px}
+.tile small{color:var(--mut);font-size:11.5px}
+.tile .cnt{position:absolute;top:13px;right:14px;color:var(--faint);font-size:12px}
+.ex{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:linear-gradient(180deg,var(--card),var(--bg2));
+  border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;transition:.15s}
+.ex:active{transform:scale(.99)}
+.ex .badge{flex:0 0 44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:19px}
+.ex .meta{flex:1;min-width:0}
+.ex .meta b{font-size:15.5px;font-weight:600;font-family:"Fraunces"}
+.ex .meta small{display:block;color:var(--mut);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex .freq{flex:0 0 auto;font-size:11px;color:var(--teal);font-weight:600;text-align:right}
+.chev{color:var(--faint);font-size:18px}
+.detail .badge-lg{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;font-size:24px}
+.block{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:12px}
+.field-t{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:7px}
+.steps{counter-reset:s;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;position:relative;padding:7px 0 7px 34px;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.45}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:23px;height:23px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--teal)}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border-bottom:none}
+.kv span{color:var(--mut)}.kv b{text-align:right;font-weight:600}
+.safety{background:var(--dangerBg);border:1px solid #5a2c22;border-radius:14px;padding:13px 15px;margin-top:12px;font-size:13.5px;line-height:1.5;color:#f0c9bd}
+.safety b{color:#f3a48f}
+.player{position:fixed;inset:0;z-index:50;background:radial-gradient(800px 500px at 50% 18%, #16302e, var(--bg) 70%);
+  display:flex;flex-direction:column;animation:fade .3s ease;max-width:560px;margin:0 auto}
+.player .ptop{display:flex;align-items:center;justify-content:space-between;padding:16px 18px}
+.player .ptop b{font-family:"Fraunces";font-size:17px}
+.pclose{font-size:15px;color:var(--mut);background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px}
+.pstage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:10px 24px;text-align:center}
+.orb-wrap{position:relative;width:280px;height:280px;display:grid;place-items:center}
+.orb{width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%, #4fd6c4 0%, var(--teal) 38%, var(--teal2) 100%);
+  box-shadow:0 0 60px rgba(45,182,164,.35), inset 0 0 40px rgba(0,0,0,.2);
+  transform:scale(.55);transition:transform 4s ease-in-out}
+.orb.co2{background:radial-gradient(circle at 38% 34%, #f2b566 0%, var(--amber) 40%, var(--amberD) 100%);box-shadow:0 0 60px rgba(224,146,47,.35), inset 0 0 40px rgba(0,0,0,.2)}
+.orb-ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(255,255,255,.12)}
+.phase{font-family:"Fraunces";font-size:30px;line-height:1.1}
+.bigtimer{font-family:"Fraunces";font-size:74px;line-height:1;letter-spacing:1px}
+.subt{color:var(--mut);font-size:14px;max-width:340px;line-height:1.5}
+.counters{display:flex;gap:26px;justify-content:center;color:var(--mut);font-size:13px}
+.counters b{display:block;font-family:"Fraunces";font-size:22px;color:var(--ink)}
+.pctrl{padding:16px 22px calc(26px + env(safe-area-inset-bottom));display:flex;gap:12px}
+.note-amber{color:var(--amber)} .note-teal{color:var(--teal)}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;max-width:560px;margin:0 auto;
+  background:linear-gradient(rgba(15,26,26,.5),var(--bg));backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--faint);font-size:10.5px;font-weight:600;padding:6px}
+.nav button.on{color:var(--teal)}
+.nav .ni{font-size:19px;line-height:1}
+.spark{display:flex;align-items:flex-end;gap:4px;height:64px;margin-top:10px}
+.spark .b{flex:1;background:linear-gradient(var(--teal),var(--teal2));border-radius:4px 4px 0 0;min-height:4px;position:relative}
+.spark .b small{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--mut)}
+.scalebar{display:flex;border-radius:10px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.scalebar div{flex:1;padding:7px 2px;text-align:center;font-size:10px;color:#fff;font-weight:600}
+.muted{color:var(--mut);font-size:13px;line-height:1.55}
+.src{color:var(--faint);font-size:11px;line-height:1.5;margin-top:10px}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.sw{width:48px;height:28px;border-radius:999px;background:var(--card2);border:1px solid var(--line2);position:relative;transition:.2s}
+.sw.on{background:var(--tealD)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on::after{left:23px}
+.disclaimer{font-size:11px;color:var(--faint);line-height:1.5;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+input[type=range]{accent-color:var(--teal)}
+.overlay{position:fixed;inset:0;z-index:80;background:rgba(4,12,12,.74);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);border:1px solid var(--line2);border-radius:20px 20px 0 0;max-width:560px;width:100%;padding:20px 20px calc(24px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto;animation:fade .3s ease}
+.sheet h2{font-size:22px;margin:2px 0 10px}
+.sheet .srow{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.5}
+.sheet .srow:last-of-type{border-bottom:none}
+.sheet .srow b{color:#f3a48f}
+.sheet .ic{flex:0 0 22px;height:22px;border-radius:50%;background:var(--dangerBg);border:1px solid #5a2c22;color:#f3a48f;display:grid;place-items:center;font-weight:700;font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <div class="brand"><span class="dot"></span> Souffle</div>
+    <button class="boltchip" onclick="go('detail','bolt')">
+      <span>BOLT</span><b id="chipBolt">—</b><small id="chipZone"></small>
+    </button>
+  </div>
+  <div id="view" class="view"></div>
+  <div class="nav">
+    <button data-nav="home" class="on" onclick="go('home')"><span class="ni">◎</span>Accueil</button>
+    <button data-nav="cats" onclick="go('cats')"><span class="ni">≋</span>Exercices</button>
+    <button data-nav="track" onclick="go('track')"><span class="ni">⤴</span>Suivi</button>
+    <button data-nav="info" onclick="go('info')"><span class="ni">𝒾</span>Méthode</button>
+  </div>
+</div>
+<div id="playerRoot"></div>
+
+<script>
+const LS=window.localStorage;
+function load(k,d){try{const v=LS.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function save(k,v){try{LS.setItem(k,JSON.stringify(v))}catch(e){}}
+let boltHist=load('sf_bolt',[]);
+let sessions=load('sf_sess',[]);
+let settings=load('sf_set',{sound:true,vibe:true});
+let metrics=load('sf_metrics',[]);
+function todayMetric(){return metrics.filter(function(m){return m.t===todayISO();})[0];}
+function saveMetric(o){var m=todayMetric();if(!m){m={t:todayISO()};metrics.push(m);}for(var k in o)m[k]=o[k];if(metrics.length>400)metrics=metrics.slice(-400);save('sf_metrics',metrics);}
+function logApnea(v){if(!v)return;var m=todayMetric();var cur=(m&&m.apnea)?m.apnea:0;saveMetric({apnea:Math.max(cur,v)});}
+function boltTrend(){
+  if(boltHist.length<2)return{dir:'—',delta:0,avg:null};
+  var last=boltHist[boltHist.length-1].s;
+  var recent=boltHist.slice(-8,-1).map(function(b){return b.s;});
+  if(!recent.length)return{dir:'—',delta:0,avg:null};
+  var avg=recent.reduce(function(a,b){return a+b;},0)/recent.length;
+  var d=last-avg;
+  return{dir:d>0.8?'hausse':(d<-0.8?'baisse':'stable'),delta:d,avg:avg};
+}
+function readiness(){
+  var s=lastBolt();
+  if(s==null)return{phase:'—',deload:false,dropping:false,msg:'Fais ton test BOLT pour calibrer la journée.'};
+  var t=boltTrend();var dropping=(t.dir==='baisse');var phase,msg;
+  if(s<25){phase='A';msg='Phase A — fondations & récup. Priorité sommeil + nasal 24/7. Pas de table O₂ ni de VHL.';}
+  else if(s<30){phase='B';msg='Phase B — reprise progressive : légère + apnea walk, table CO₂ légère, VHL 1×/sem.';}
+  else if(s<40){phase='C';msg='Phase C — programme complet : table O₂, VHL 2-3×/sem, apnées plus longues.';}
+  else {phase='C+';msg='Optimal — maintien & perf. Re-teste l’apnée max de temps en temps.';}
+  if(dropping&&s>=25){msg='BOLT en baisse : jour allégé conseillé aujourd’hui, même si ta zone le permettrait. On consolide.';}
+  return{phase:phase,deload:(s<25||dropping),dropping:dropping,trend:t,msg:msg};
+}
+
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+function fmt(s){s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return m>0?(m+':'+String(r).padStart(2,'0')):(r+'s');}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function lastBolt(){return boltHist.length?boltHist[boltHist.length-1].s:null;}
+function boltZone(s){
+  if(s==null)return{l:'Non mesuré',c:'#5f7c79'};
+  if(s<10)return{l:'Très dysfonctionnelle',c:'#b5462f'};
+  if(s<20)return{l:'Dysfonctionnelle',c:'#c86a3a'};
+  if(s<25)return{l:'Sous le seuil',c:'#c8902f'};
+  if(s<30)return{l:'Acceptable',c:'#9a9a3f'};
+  if(s<40)return{l:'Bon',c:'#3f9e86'};
+  return{l:'Optimal',c:'#2db6a4'};
+}
+function beep(f,d){f=f||660;d=d||0.12;
+  if(!settings.sound)return;
+  try{const a=beep._c||(beep._c=new (window.AudioContext||window.webkitAudioContext)());
+    const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.type='sine';
+    o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);
+    o.start();o.stop(a.currentTime+d+.02);}catch(e){}
+}
+function vibe(ms){if(settings.vibe&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
+
+const CATS=[
+  {id:'eval', name:'Évaluer', ic:'◔', col:'#2db6a4', desc:'Mesures & repères'},
+  {id:'co2', name:'Tolérance CO₂', ic:'⬡', col:'#e0922f', desc:'Le cœur de la méthode'},
+  {id:'reg', name:'Réguler · Nez', ic:'∿', col:'#2db6a4', desc:'Calme, sommeil, NO'},
+  {id:'mov', name:'Apnée en mouvement', ic:'⚡', col:'#d65a40', desc:'Avancé · prudence'},
+  {id:'found', name:'Fondations', ic:'⌂', col:'#2db6a4', desc:'Habitudes nasales'},
+  {id:'band', name:'Bande costale', ic:'◍', col:'#2db6a4', desc:'Feedback diaphragme'},
+];
+const EX=[
+ {id:'bolt',cat:'eval',name:'Test BOLT',benefit:'Tolérance au CO₂ & qualité du souffle',
+  freq:'1×/jour, au réveil', dose:'1 mesure', nowatch:'Compte les secondes jusqu’au 1er désir',
+  setup:'Le matin au réveil, après ~10 min de repos, assis le dos droit, au calme.',
+  steps:['Respire normalement par le nez.','Après une expiration <b>normale</b> (non forcée), pince le nez et démarre.','Arrête au <b>1er désir défini</b> de respirer (contraction du ventre/gorge, déglutition).','Relâche : la 1re inspiration doit rester calme et nasale.'],
+  safety:'Ce n’est pas une apnée maximale.', player:'bolt'},
+ {id:'retmax',cat:'eval',name:'Rétention max',benefit:'Définit ta référence 50 % pour la table CO₂',
+  freq:'1× / 2–4 sem', dose:'1 essai', nowatch:'Signal d’arrêt = fortes contractions',
+  setup:'Assis, au repos, au sec. À faire rarement.',
+  steps:['Inspire ~70–80 % (sans forcer ni packing).','Pince le nez et retiens.','Tiens jusqu’aux <b>fortes contractions</b>, bien avant tout vertige.','Note la durée : 50 % = ta durée de table CO₂.'],
+  safety:'Jamais d’hyperventilation avant ; jamais dans l’eau.', player:'hold', sv:'retmax'},
+ {id:'expmax',cat:'eval',name:'Expiration max',benefit:'Contrôle expiratoire & diaphragme',
+  freq:'1–2×/sem (test)', dose:'1–2 essais', nowatch:'Jusqu’à la sensation de poumons vides',
+  setup:'Assis, détendu.',
+  steps:['Inspire confortablement.','Expire le plus <b>lentement et longtemps</b> possible, en continu.','Va jusqu’à poumons quasi vides, sans forcer la fin.'],
+  safety:null, player:'hold', sv:'expmax'},
+ {id:'light',cat:'co2',name:'Respiration légère',benefit:'Base de la méthode · ↑ tolérance CO₂',
+  freq:'2–3×/jour', dose:'1 série de 5–10 min', nowatch:'~40–60 respirations légères',
+  setup:'Assis ou allongé, détendu, épaules basses, 100 % nasal.',
+  steps:['Pose une main sur le ventre.','Réduis le volume à ~<b>80 %</b> du normal : respirations plus petites et lentes.','Laisse monter une faim d’air <b>légère et tolérable</b>.','Garde le souffle silencieux ; ne crispe pas le ventre.'],
+  safety:'Faim d’air légère, jamais la suffocation.', player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (petit)',d:4,k:'in'},{l:'Expire (lent)',d:6,k:'out'}],secs:300,note:'Vise une légère faim d’air, sans forcer.'}},
+ {id:'apnea',cat:'co2',name:'Apnea Walk',benefit:'↑ tolérance CO₂ · effet altitude',
+  freq:'1×/jour (5–6 j/sem)', dose:'8–10 apnées · repos ~30–45 s', nowatch:'Compte les pas tenus ; repos ~10–15 respirations',
+  setup:'À jeun, terrain plat et dégagé, respiration nasale.',
+  steps:['Marche ~1 min en respirant par le nez.','Expire doucement, pince le nez et marche en apnée.','Marche jusqu’à une faim d’air <b>moyenne à forte</b>.','Reprends en <b>minimisant</b> la respiration ~15 s.','Récupère normalement, puis recommence.'],
+  safety:'Jamais dans l’eau ni en conduisant. Sol plat.', player:'apnea',
+  apnea:{rounds:8,reduced:15,recover:35,walkPrep:true}},
+ {id:'unblock',cat:'co2',name:'Décongestion nasale',benefit:'Débloque le nez (le CO₂ rouvre les voies)',
+  freq:'au besoin, jusqu’à 1×/jour', dose:'6 apnées · repos 1–2 min', nowatch:'Faim d’air moyenne-forte ; objectif ~80 pas tenus',
+  setup:'Assis bien droit (version statique) ou debout. Nez très bouché ? Prends une petite inspiration par le coin de la bouche.',
+  steps:['Petite inspiration nasale, petite expiration nasale, silencieuses.','Pince le nez, bouche fermée.','<b>Statique</b> : hoche la tête (haut/bas) ou balance le buste. <b>Variante active</b> : marche, ou mouvement plus vif (squats, marche sur place) pour faire monter le CO₂ plus vite.','Tiens jusqu’à une faim d’air <b>moyenne à forte</b> (jamais maximale).','Relâche, reprends par le nez en <b>2–3 souffles calmes</b> (si tu halètes, tu as tenu trop longtemps).','Attends 1–2 min, répète ~6 fois. Vas-y doucement aux premiers essais.'],
+  safety:'Faim d’air moyenne-forte, pas maximale. Assieds-toi si tu te sens étourdi. Le nez peut se reboucher au début : il se stabilise avec la pratique régulière. Le fredonnement (Bhramari) peut aider en complément.', player:'apnea',
+  apnea:{rounds:6,reduced:0,recover:75,walkPrep:false}},
+ {id:'unblock_sq',cat:'co2',name:'Décongestion active (squats)',benefit:'Débloque le nez plus vite via le mouvement',
+  freq:'au besoin', dose:'6 séries · repos ~1 min', nowatch:'Faim d’air moyenne-forte ; ~10–15 squats/apnée',
+  setup:'Debout, espace dégagé, près du sol. Variante « mouvement » de la décongestion : les squats font monter le CO₂ plus vite.',
+  steps:['Petite inspiration nasale, petite expiration nasale.','Pince le nez, bouche fermée.','Enchaîne des squats (ou marche sur place vive) jusqu’à une faim d’air <b>moyenne à forte</b>.','Relâche, reprends par le nez en <b>2–3 souffles calmes</b>.','~1 min de repos, puis répète (6 séries).'],
+  safety:'Faim d’air moyenne-forte, jamais maximale. Reste près du sol et assieds-toi si tu te sens étourdi.', player:'reps',
+  reps:{sets:6,cue:'Pince le nez → squats',recover:'2–3 souffles nasaux calmes (~1 min)'}},
+ {id:'co2table',cat:'co2',name:'Table CO₂ (statique)',benefit:'↑ tolérance au « besoin de respirer »',
+  freq:'1×/jour maximum', dose:'6–10 apnées ≈50 % du max', nowatch:'Repos décroissant en respirations (5→4→3→2)',
+  setup:'Assis ou allongé, immobile, au sec.',
+  steps:['Fixe une apnée <b>constante</b> ≈ 50 % de ton max (ou ton BOLT).','Fais l’apnée, puis récupère.','<b>Raccourcis le repos</b> à chaque tour (−5 s).','Respiration normale aux récups (pas d’hyperventilation).'],
+  safety:'1 seule table/jour ; jamais dans l’eau.', player:'table'},
+ {id:'o2table',cat:'co2',name:'Table O₂ (hypoxie)',benefit:'Tolérance à l’hypoxie · stimulus « type altitude »',
+  freq:'1×/jour max (phases 2-3)', dose:'6–8 apnées · repos fixe', nowatch:'Durée d’apnée croissante ; repos constant',
+  setup:'Assis ou allongé, immobile, au sec. Avancé : c’est la table qui fait baisser la SpO₂.',
+  steps:['Choisis une apnée de départ (~50 % du max ou ton BOLT) et un repos <b>fixe</b>.','La durée d’apnée <b>augmente</b> à chaque tour ; le repos reste constant.','Respiration normale aux récups, jamais d’hyperventilation.','Stoppe aux contractions fortes — jamais jusqu’au malaise.'],
+  safety:'(!) C’est l’exercice le plus hypoxiant. 1 seule table/jour, jamais dans l’eau, idéalement accompagné. Avec oxymètre : limite la descente (pas sous ~80 %), ne la chasse pas. Stop au vertige.', player:'o2table'},
+ {id:'coh',cat:'reg',name:'Cohérence 5,5–6/min',benefit:'↑ VRC · ↓ stress · récup · sommeil',
+  freq:'1–2×/jour (+ si stress)', dose:'1 série de 5–10 min', nowatch:'~30 cycles lents et égaux',
+  setup:'Assis ou allongé, respiration nasale et diaphragmatique.',
+  steps:['Inspire 5,5 s : le ventre se gonfle.','Expire 5,5 s : la poitrine reste calme.','Enchaîne sans pause, régulièrement.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire',d:5.5,k:'in'},{l:'Expire',d:5.5,k:'out'}],secs:300,note:'~0,1 Hz : la fréquence de résonance qui maximise la VRC.'}},
+ {id:'sigh',cat:'reg',name:'Soupir physiologique',benefit:'↓ stress/anxiété · humeur (Stanford 2023)',
+  freq:'1×/jour + à la demande', dose:'5 min', nowatch:'~20–30 soupirs',
+  setup:'N’importe où ; inspiration nez, expiration bouche.',
+  steps:['Inspire par le nez.','Ajoute une <b>2e courte inspiration</b> par-dessus.','Expire <b>longuement</b> par la bouche (≈ 2× l’inspiration).','Répète.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (nez)',d:2,k:'in'},{l:'2e inspiration',d:1,k:'in2'},{l:'Longue expiration (bouche)',d:6,k:'out'}],secs:300,note:'Double inspiration puis expiration longue, ratio ~1:2.'}},
+ {id:'box',cat:'reg',name:'Respiration carrée 4-4-4-4',benefit:'Focus · contrôle avant l’effort',
+  freq:'au besoin', dose:'3–5 min', nowatch:'~15–20 cycles',
+  setup:'Assis, respiration nasale.',
+  steps:['Inspire 4 s.','Retiens 4 s.','Expire 4 s.','Pause 4 s, puis recommence.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire',d:4,k:'in'},{l:'Retiens',d:4,k:'hold'},{l:'Expire',d:4,k:'out'},{l:'Pause',d:4,k:'pause'}],secs:240,note:'Phases égales, équilibrant.'}},
+ {id:'478',cat:'reg',name:'Récupération 4-7-8',benefit:'Endormissement · parasympathique',
+  freq:'1×/jour, le soir', dose:'4–8 cycles', nowatch:'Compte les cycles (4 → 8)',
+  setup:'Assis ou allongé, le soir.',
+  steps:['Inspire 4 s par le nez.','Retiens 7 s.','Expire 8 s, lèvres pincées.','4 cycles au début, jusqu’à 8 avec l’habitude.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (nez)',d:4,k:'in'},{l:'Retiens',d:7,k:'hold'},{l:'Expire (bouche)',d:8,k:'out'}],cycles:6,note:'L’expiration longue active le parasympathique.'}},
+ {id:'bhramari',cat:'reg',name:'Bhramari (fredonnement)',benefit:'↑ NO nasal ~15× · décongestion · calme',
+  freq:'1–3×/jour', dose:'5–10 expirations fredonnées', nowatch:'Compte les expirations',
+  setup:'Assis, bouche fermée, épaules relâchées.',
+  steps:['Inspire calmement par le nez.','Expire en <b>fredonnant</b> « mmm », bouche fermée.','Sens la vibration dans le nez et le visage.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (nez)',d:4,k:'in'},{l:'Fredonne « mmm »',d:8,k:'out'}],cycles:8,note:'La vibration multiplie l’oxyde nitrique nasal.'}},
+ {id:'nadi',cat:'reg',name:'Nadi shodhana',benefit:'Équilibre · recentrage · ralentit le souffle',
+  freq:'1×/jour', dose:'~5 min', nowatch:'~20 cycles alternés',
+  setup:'Assis, main droite près du nez.',
+  steps:['Bouche la narine droite, inspire à gauche.','Bouche à gauche, expire à droite.','Inspire à droite.','Expire à gauche = 1 cycle.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire gauche',d:4,k:'in'},{l:'Expire droite',d:4,k:'out'},{l:'Inspire droite',d:4,k:'in'},{l:'Expire gauche',d:4,k:'out'}],secs:300,note:'Alterne les narines au rythme de l’orbe.'}},
+ {id:'vhl',cat:'mov',name:'Sprints en hypoventilation (VHL)',benefit:'↑ capacité à répéter les sprints · tampon (Précart/Woorons 2025)',
+  freq:'2–3×/sem', dose:'6–10 sprints · 1–2 séries', nowatch:'~15–25 foulées ; repos ~10–15 respirations',
+  setup:'Échauffé, terrain dégagé. Méthode à bas volume pulmonaire.',
+  steps:['Avant le sprint, <b>expire normalement</b> (bas volume, pas à fond).','Retiens et lance le sprint (~20–30 m).','En finissant, expire le reste.','Récupère en respirant normalement.'],
+  safety:'Jamais après hyperventilation ni dans l’eau.', player:'reps',
+  reps:{sets:8,cue:'Expire → retiens → sprint',recover:'~10–15 respirations'}},
+ {id:'squat',cat:'mov',name:'Squats en apnée',benefit:'Tolérance CO₂/lactique · force jambes',
+  freq:'2–3×/sem', dose:'4–6 séries', nowatch:'~10–20 squats/apnée ; repos ~8–12 respirations',
+  setup:'Espace dégagé, près du sol.',
+  steps:['Expire normalement (bas volume).','Retiens et enchaîne des squats.','Stoppe à une faim d’air <b>moyenne/forte</b> (pas maximale).','Récupère debout, souffle calme.'],
+  safety:'Arrête bien avant le vertige.', player:'reps',
+  reps:{sets:5,cue:'Expire → retiens → squats',recover:'~8–12 respirations'}},
+ {id:'pushup',cat:'mov',name:'Pompes en apnée',benefit:'Tolérance CO₂ · gainage/haut du corps',
+  freq:'2–3×/sem', dose:'4–6 séries', nowatch:'~8–15 pompes/apnée ; repos ~8–12 respirations',
+  setup:'Au sol, position de pompe.',
+  steps:['Expire normalement (bas volume).','Retiens et enchaîne des pompes.','Stoppe à une faim d’air moyenne/forte.','Récupère, souffle calme.'],
+  safety:'Arrête bien avant le vertige.', player:'reps',
+  reps:{sets:5,cue:'Expire → retiens → pompes',recover:'~8–12 respirations'}},
+ {id:'pullup',cat:'mov',name:'Tractions en apnée',benefit:'Haut du corps — (!) chute si malaise',
+  freq:'1–2×/sem, encadré', dose:'Sous-maximal, accompagné', nowatch:'3–6 tractions max/apnée',
+  setup:'Barre <b>basse</b>, encadré. Réservé aux pratiquants avancés.',
+  steps:['Expire normalement (bas volume).','Retiens et fais quelques tractions <b>sous-maximales</b>.','Stoppe bien avant l’épuisement.','Jamais en solo.'],
+  safety:'Risque de chute : jamais en solo, barre basse.', player:'reps',
+  reps:{sets:4,cue:'Expire → retiens → tractions',recover:'récupération complète'}},
+ {id:'vhl_hi',cat:'mov',name:'VHL haute intensité (jump squat / burpees)',benefit:'Stimulus « type altitude » · tolérance lactate & CO₂',
+  freq:'2–3×/sem (pas quotidien)', dose:'4–6 séries', nowatch:'~6–10 reps/apnée ; récup complète entre séries',
+  setup:'Avancé. Échauffé, espace dégagé, sol stable. Expire <b>normalement</b> (bas volume pulmonaire), surtout pas poumons pleins.',
+  steps:['Expire normalement (bas volume) puis pince/retiens.','Enchaîne des jump squats ou des burpees.','Stoppe à une faim d’air <b>modérée</b> — jamais maximale, surtout pas « jusqu’au breaking point » en sauté.','Récupère <b>complètement</b> (souffle calme) avant la série suivante.','4–6 séries.'],
+  safety:'(!) Risque de syncope/chute : désoxygénation cérébrale + pliométrie. Jamais près de l’eau ou d’un bord, sol stable, pas en solo au début, stop au moindre vertige. Déconseillé si problème cardiovasculaire, hypertension, grossesse, épilepsie.', player:'reps',
+  reps:{sets:5,cue:'Expire → retiens → jump squats / burpees',recover:'récupération complète, souffle calme'}},
+ {id:'nasal',cat:'found',name:'Respiration nasale 24/7',benefit:'Filtre, humidifie, ↑ NO, entraîne la tolérance CO₂',
+  freq:'En permanence', dose:'Toute la journée', nowatch:'Bouche fermée par défaut',
+  setup:'Adopter le nez comme voie respiratoire par défaut, au repos comme à l’effort modéré.',
+  steps:['Au repos : bouche fermée, langue au palais, respiration silencieuse.','À l’effort modéré : garde le nez ; ouvre la bouche seulement quand c’est vraiment dur.','Nez bouché ? Fais la <b>décongestion nasale</b>.'],
+  safety:'Pilier de la méthode : le nez ajoute une résistance naturelle et bâtit la tolérance au CO₂.', player:'info'},
+ {id:'tape',cat:'found',name:'Tape buccal nocturne',benefit:'Optionnel & débattu — viser le nez la nuit',
+  freq:'Optionnel (avis médical)', dose:'—', nowatch:'—',
+  setup:'Idée : une fine bande poreuse (type 3M Micropore/MyoTape) qui se retire très facilement, pour favoriser la respiration nasale la nuit. À aborder avec prudence.',
+  steps:['D’abord, travaille la respiration nasale de <b>jour</b> et décongestionne le nez : c’est ça la priorité.','Si tu essaies : uniquement un tape poreux qui se décolle tout seul, jamais hermétique.','Au moindre doute, n’utilise pas et demande un avis médical.'],
+  safety:'(!) Une revue systématique 2025 (Rhee/Rotenberg, PLOS One) conclut à un bénéfice limité et un <b>risque d’asphyxie</b> si le nez n’est pas parfaitement dégagé. À proscrire en cas d’obstruction nasale, ronflement / apnée du sommeil non traitée, congestion, alcool/sédatifs, reflux. La respiration nasale de jour reste l’essentiel.', player:'info'},
+ {id:'nasex',cat:'found',name:'Respiration nasale à l’effort',benefit:'Endurance, économie, ↑ tolérance CO₂ à l’exercice',
+  freq:'Séances faciles/modérées', dose:'Échauffement + aérobie', nowatch:'Garde le nez tant que possible',
+  setup:'Sur footing/vélo facile à modéré, respire uniquement par le nez ; réduis légèrement le volume.',
+  steps:['Échauffe-toi en respiration nasale, diaphragme.','Maintiens le nez en cherchant une légère faim d’air.','Possible : <b>apnées en marchant/courant</b> (8–10×, 1 min nasal entre).'],
+  safety:'Ouvre la bouche aux intensités très élevées ; ne te mets jamais en détresse.', player:'info'},
+ {id:'imt',cat:'found',name:'Muscles respiratoires (IMT)',benefit:'Force des muscles inspiratoires (option, appareil)',
+  freq:'1–2×/jour, ~5 min', dose:'2 × 30 respirations résistées', nowatch:'30 respirations contre résistance',
+  setup:'Avec un appareil à résistance inspiratoire (type POWERbreathe). Optionnel, complémentaire.',
+  steps:['Règle une résistance permettant ~30 respirations difficiles.','Inspire fort et profond contre la résistance, expire détendu.','2 séries de 30, 1–2×/jour.'],
+  safety:'Distinct du travail CO₂ ; ne remplace pas la respiration légère.', player:'info'},
+ {id:'band',cat:'band',name:'Respiration costale guidée',benefit:'Apprendre l’expansion latérale 360°',
+  freq:'1×/jour (puis espacer)', dose:'2–3 séries de 10 respirations', nowatch:'~10 respirations lentes/série',
+  setup:'Bande élastique <b>légère</b> autour des côtes basses, ajustée mais non serrée.',
+  steps:['Inspire lentement par le nez en poussant les côtes <b>vers l’extérieur</b>, contre la bande.','Garde poitrine et épaules calmes.','Expire lentement : la bande se relâche.'],
+  safety:'Feedback, pas restriction : jamais au point de gêner le souffle.', player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (pousse les côtes)',d:4,k:'in'},{l:'Expire (relâche)',d:6,k:'out'}],secs:120,note:'Sens les côtes s’ouvrir latéralement contre la bande.'}},
+];
+function exById(id){return EX.find(e=>e.id===id);}
+function exByCat(c){return EX.filter(e=>e.cat===c);}
+
+let cur='home';
+function setNav(n){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===n));}
+function go(where,arg){
+  cur=where;const v=$('#view');
+  if(where==='home'){renderHome(v);setNav('home');}
+  else if(where==='cats'){renderCats(v);setNav('cats');}
+  else if(where==='catlist'){renderCatList(v,arg);setNav('cats');}
+  else if(where==='detail'){renderDetail(v,arg);setNav('cats');}
+  else if(where==='track'){renderTrack(v);setNav('track');}
+  else if(where==='info'){renderInfo(v);setNav('info');}
+  else if(where==='prog'){renderProg(v);setNav('info');}
+  else if(where==='sport'){renderSport(v);setNav('home');}
+  window.scrollTo(0,0);refreshChip();
+}
+function refreshChip(){
+  const s=lastBolt(),z=boltZone(s);
+  $('#chipBolt').textContent=s==null?'—':s+'s';
+  $('#chipZone').textContent=s==null?'à tester':z.l.split(' ')[0];
+  $('#chipZone').style.color=z.c;
+}
+
+function renderHome(v){
+  const s=lastBolt(),z=boltZone(s);v.innerHTML='';
+  v.appendChild(el('div','kicker','Respiration fonctionnelle'));
+  v.appendChild(el('h1','h-hero display','Respire mieux,<br>chaque jour.'));
+  const c=el('div','card bolt-card');
+  c.innerHTML='<div class="ring"></div>'+
+    '<div style="font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase">Score BOLT</div>'+
+    '<div class="bolt-num">'+(s==null?'—':s)+'<span>'+(s==null?'':'secondes')+'</span></div>'+
+    '<div class="zone-pill" style="background:'+z.c+'22;color:'+z.c+';border:1px solid '+z.c+'55">'+z.l+'</div>'+
+    '<div class="row" style="margin-top:14px">'+
+    '<button class="btn primary block" onclick="go(\'detail\',\'bolt\')">'+(s==null?'Faire le test':'Re-tester')+'</button>'+
+    '<button class="btn block" onclick="go(\'track\')">Historique</button></div>';
+  v.appendChild(c);
+  var _r=readiness();
+  if(lastBolt()!=null){
+    var _bc=_r.deload?'#e0922f':'#2db6a4';
+    var _bn=el('div','card');_bn.style.cssText='margin-top:12px;border-left:3px solid '+_bc;
+    _bn.innerHTML='<div class="field-t" style="color:'+_bc+'">État du jour · Phase '+_r.phase+(_r.dropping?' · BOLT en baisse':'')+'</div><div class="muted">'+_r.msg+'</div>';
+    v.appendChild(_bn);
+  }
+  v.appendChild(el('div','section-t','Routine du jour'));
+  suggestRoutine(s).forEach(id=>{const e=exById(id);if(e)v.appendChild(exRow(e));});
+  v.appendChild(el('div','section-t','Apaisement express'));
+  ['sigh','coh'].forEach(id=>v.appendChild(exRow(exById(id))));
+  var _sp=el('button','btn block','Respirer par sport & intensité ›');_sp.style.marginTop='16px';_sp.onclick=function(){go('sport');};v.appendChild(_sp);
+  v.appendChild(el('div','disclaimer','Fondé sur la méthode Oxygen Advantage et la littérature. Ne remplace pas un avis médical.'));
+}
+function suggestRoutine(s){
+  if(s==null)return['bolt','light','coh'];
+  if(readiness().deload)return['bolt','light','coh','unblock'];
+  if(s<30)return['bolt','light','apnea','coh'];
+  if(s<40)return['bolt','light','apnea','co2table','478'];
+  return['bolt','light','apnea','co2table','vhl'];
+}
+
+function renderCats(v){
+  v.innerHTML='';
+  v.appendChild(el('div','kicker','Bibliothèque'));
+  v.appendChild(el('h1','h-hero display','Exercices'));
+  v.appendChild(el('p','lead','Chaque exercice détaille la mise en place, l’exécution pas à pas, la dose, la fréquence et un repère sans montre.'));
+  const g=el('div','tiles');
+  CATS.forEach(cat=>{
+    const t=el('button','tile');t.onclick=()=>go('catlist',cat.id);
+    t.innerHTML='<div class="cnt">'+exByCat(cat.id).length+'</div>'+
+      '<div class="ic" style="background:'+cat.col+'22;color:'+cat.col+'">'+cat.ic+'</div>'+
+      '<div><h3>'+cat.name+'</h3><small>'+cat.desc+'</small></div>';
+    g.appendChild(t);
+  });
+  v.appendChild(g);
+}
+function renderCatList(v,catId){
+  const cat=CATS.find(c=>c.id===catId);v.innerHTML='';
+  const back=el('button','btn sm ghost','‹ Familles');back.onclick=()=>go('cats');v.appendChild(back);
+  v.appendChild(el('div','kicker',cat.desc));
+  v.appendChild(el('h1','h-hero display',cat.name));
+  if(catId==='mov')v.appendChild(el('div','safety','<b>Avancé · risque de syncope.</b> Faim d’air modérée, jamais après hyperventilation ni dans l’eau, près du sol, idéalement accompagné. Stop au moindre vertige.'));
+  exByCat(catId).forEach(e=>v.appendChild(exRow(e)));
+}
+function exRow(e){
+  const cat=CATS.find(c=>c.id===e.cat);
+  const r=el('button','ex');r.onclick=()=>go('detail',e.id);
+  r.innerHTML='<div class="badge" style="background:'+cat.col+'1f;color:'+cat.col+'">'+cat.ic+'</div>'+
+    '<div class="meta"><b>'+e.name+'</b><small>'+e.benefit+'</small></div>'+
+    '<div class="freq">'+e.freq+'</div><div class="chev">›</div>';
+  return r;
+}
+
+function renderDetail(v,id){
+  const e=exById(id),cat=CATS.find(c=>c.id===e.cat);v.innerHTML='';
+  const back=el('button','btn sm ghost','‹ Retour');back.onclick=()=>go('catlist',e.cat);v.appendChild(back);
+  const head=el('div','detail');head.style.cssText='display:flex;gap:14px;align-items:center;margin:10px 2px 2px';
+  head.innerHTML='<div class="badge-lg" style="background:'+cat.col+'1f;color:'+cat.col+'">'+cat.ic+'</div>'+
+    '<div><div class="kicker" style="color:'+cat.col+'">'+cat.name+'</div><h1 style="font-size:24px;margin-top:3px">'+e.name+'</h1></div>';
+  v.appendChild(head);
+  v.appendChild(el('p','lead',e.benefit));
+  const kv=el('div','block');
+  kv.innerHTML='<div class="kv"><span>Fréquence</span><b style="color:'+cat.col+'">'+e.freq+'</b></div>'+
+    '<div class="kv"><span>Dose</span><b>'+e.dose+'</b></div>'+
+    '<div class="kv"><span>Sans montre</span><b>'+e.nowatch+'</b></div>';
+  v.appendChild(kv);
+  const b=el('div','block');
+  b.innerHTML='<div class="field-t">Mise en place</div><div class="muted" style="margin-bottom:12px">'+e.setup+'</div><div class="field-t">Exécution</div>';
+  const ol=el('ol','steps');e.steps.forEach(s=>ol.appendChild(el('li',null,s)));b.appendChild(ol);v.appendChild(b);
+  if(e.safety)v.appendChild(el('div','safety','<b>Sécurité.</b> '+e.safety));
+  if(e.player!=='info'){
+    const bolt=lastBolt();
+    const gated=(e.cat==='mov'||['apnea','co2table','o2table','retmax'].indexOf(e.id)>=0)&&(bolt!=null&&bolt<20);
+    const start=el('button','btn '+((e.cat==='co2'||e.cat==='mov')?'amber':'primary')+' block');
+    start.style.marginTop='16px';start.textContent='Démarrer';
+    start.onclick=function(){
+      if(gated&&!confirm('Ton BOLT est < 20 s. Les apnées ne sont pas recommandées à ce stade : consolide d’abord la respiration légère. Démarrer quand même ?'))return;
+      openPlayer(e);
+    };
+    v.appendChild(start);
+  }
+}
+
+/* ---- player engine ---- */
+let activeTimers=[],cancelled=false;
+function clearTimers(){activeTimers.forEach(t=>{clearTimeout(t);clearInterval(t);});activeTimers=[];}
+function closePlayer(){cancelled=true;clearTimers();$('#playerRoot').innerHTML='';}
+function logSession(name){sessions.push({t:new Date().toISOString(),name:name});if(sessions.length>200)sessions=sessions.slice(-200);save('sf_sess',sessions);}
+function playerShell(title,bodyHtml){
+  cancelled=false;clearTimers();
+  const p=el('div','player');
+  p.innerHTML='<div class="ptop"><b>'+title+'</b><button class="pclose" onclick="closePlayer()">Fermer</button></div>'+
+    '<div class="pstage" id="pstage">'+(bodyHtml||'')+'</div><div class="pctrl" id="pctrl"></div>';
+  $('#playerRoot').innerHTML='';$('#playerRoot').appendChild(p);return p;
+}
+function openPlayer(e){
+  if(e.player==='pacer')playPacer(e);
+  else if(e.player==='bolt')playBolt(e);
+  else if(e.player==='hold')playHold(e);
+  else if(e.player==='apnea')playApnea(e);
+  else if(e.player==='table')playTable(e);
+  else if(e.player==='o2table')playO2Table(e);
+  else if(e.player==='reps')playReps(e);
+}
+function sleep(ms){return new Promise(function(res,rej){const t=setTimeout(function(){cancelled?rej('x'):res();},ms);activeTimers.push(t);});}
+
+function playPacer(e){
+  const cfg=e.pacer;
+  playerShell(e.name,
+    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb '+(cfg.kind==='co2'?'co2':'')+'" id="orb"></div></div>'+
+    '<div class="phase" id="phase">Prêt ?</div>'+
+    '<div class="bigtimer" id="ptimer" style="font-size:40px">'+(cfg.cycles?('0/'+cfg.cycles+' cycles'):fmt(cfg.secs))+'</div>'+
+    '<div class="subt" id="psub">'+(cfg.note||'')+'</div>');
+  $('#pctrl').innerHTML='<button class="btn block primary" id="pgo">Commencer</button>';
+  $('#pgo').onclick=function(){$('#pgo').remove();runPacer(e);};
+}
+async function runPacer(e){
+  const cfg=e.pacer,orb=$('#orb');
+  let cycle=0,elapsed=0;const total=cfg.secs||0;
+  const scaleFor=function(k){return k==='in'?1:k==='in2'?1.08:(k==='out'?0.55:(k==='hold'?1:0.55));};
+  try{
+    await sleep(400);
+    while(!cancelled){
+      for(let i=0;i<cfg.phases.length;i++){
+        const ph=cfg.phases[i];
+        $('#phase').textContent=ph.l;
+        beep(ph.k==='in'||ph.k==='in2'?720:ph.k==='out'?440:560,0.1);vibe(18);
+        orb.style.transitionDuration=ph.d+'s';
+        orb.style.transform='scale('+scaleFor(ph.k)+')';
+        await sleep(ph.d*1000);
+        elapsed+=ph.d;
+        if(cfg.secs)$('#ptimer').textContent=fmt(Math.max(0,total-elapsed));
+      }
+      cycle++;
+      if(cfg.cycles){$('#ptimer').textContent=cycle+'/'+cfg.cycles+' cycles';if(cycle>=cfg.cycles)break;}
+      if(cfg.secs&&elapsed>=total)break;
+    }
+    if(!cancelled)finishPacer(e);
+  }catch(x){}
+}
+function finishPacer(e){
+  beep(880,0.18);vibe([30,40,30]);logSession(e.name);
+  $('#phase').textContent='Terminé';$('#ptimer').textContent='✓';
+  $('#psub').textContent='Belle séance. Laisse la 1re respiration rester calme.';
+  $('#orb').style.transform='scale(.7)';
+  $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer()">Fermer</button>';
+}
+
+function playBolt(e){
+  playerShell('Test BOLT',
+    '<div class="phase" id="phase">Expire normalement, puis pince le nez</div>'+
+    '<div class="bigtimer" id="ptimer">0s</div>'+
+    '<div class="subt">Arrête au <b>premier désir défini</b> de respirer. Ce n’est pas une apnée maximale.</div>');
+  let t0=null,iv=null,running=false;const ctrl=$('#pctrl');
+  ctrl.innerHTML='<button class="btn block primary" id="pgo">Démarrer le compte</button>';
+  $('#pgo').onclick=function(){
+    if(running)return;running=true;t0=Date.now();
+    iv=setInterval(function(){$('#ptimer').textContent=Math.floor((Date.now()-t0)/1000)+'s';},200);activeTimers.push(iv);
+    $('#phase').textContent='Tiens… au 1er désir, appuie';
+    ctrl.innerHTML='<button class="btn block amber" id="pstop">Premier désir — Stop</button>';
+    $('#pstop').onclick=function(){clearInterval(iv);finishBolt(Math.round((Date.now()-t0)/1000));};
+  };
+}
+function finishBolt(sc){
+  beep(740,0.15);vibe(40);
+  boltHist.push({t:todayISO(),s:sc});if(boltHist.length>400)boltHist=boltHist.slice(-400);save('sf_bolt',boltHist);
+  logSession('Test BOLT');const z=boltZone(sc);
+  $('#phase').textContent='Score enregistré';$('#ptimer').textContent=sc+'s';
+  $('#pstage').innerHTML+='<div class="zone-pill" style="background:'+z.c+'22;color:'+z.c+';border:1px solid '+z.c+'55">'+z.l+'</div><div class="subt">'+boltAdvice(sc)+'</div>';
+  $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer();go(\'home\')">Voir ma routine</button>';
+  refreshChip();
+}
+function boltAdvice(s){
+  if(s<20)return'Priorité : respiration légère et cohérence. Les apnées attendront ~20 s. Soigne sommeil et respiration nasale.';
+  if(s<30)return'Bonne base. Ajoute apnea walk et la table CO₂ légère. Vise +1 à +2 s/semaine.';
+  if(s<40)return'Très bien. Tu peux intégrer la table CO₂ et l’apnée en mouvement.';
+  return'Optimal. Maintiens ce niveau ~6 mois ; l’apnée en mouvement est accessible.';
+}
+
+function playHold(e){
+  playerShell(e.name,
+    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb" id="orb" style="transform:scale(.7)"></div></div>'+
+    '<div class="bigtimer" id="ptimer">0s</div>'+
+    '<div class="subt">'+(e.id==='retmax'?'Tiens jusqu’aux fortes contractions, sans aller à l’extrême.':'Expire le plus longtemps possible, en continu.')+'</div>');
+  let t0=null,iv=null;
+  $('#pctrl').innerHTML='<button class="btn block primary" id="pgo">Démarrer</button>';
+  $('#pgo').onclick=function(){
+    t0=Date.now();iv=setInterval(function(){$('#ptimer').textContent=Math.floor((Date.now()-t0)/1000)+'s';},200);activeTimers.push(iv);
+    $('#pctrl').innerHTML='<button class="btn block amber" id="pstop">Stop</button>';
+    $('#pstop').onclick=function(){clearInterval(iv);const sc=Math.round((Date.now()-t0)/1000);
+      beep(660,0.15);vibe(40);logSession(e.name);save('sf_'+e.sv,sc);if(e.id==='retmax')logApnea(sc);
+      $('#ptimer').textContent=sc+'s';
+      if(e.id==='retmax')$('#pstage').innerHTML+='<div class="subt note-amber">≈ 50 % = '+Math.round(sc/2)+' s → durée pour ta table CO₂.</div>';
+      $('#pstage').innerHTML+='<div class="subt note-teal">Récupération : 6 souffles nettoyants (courts, calmes). Reste assis 15 s.</div>';
+      $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer()">Fermer</button>';
+    };
+  };
+}
+
+async function playApnea(e){
+  const cf=e.apnea;let round=0,holds=[];
+  playerShell(e.name,
+    '<div class="phase" id="phase">'+(cf.walkPrep?'Marche ~1 min en respiration nasale':'Prépare-toi')+'</div>'+
+    '<div class="bigtimer" id="ptimer" style="font-size:54px">—</div>'+
+    '<div class="subt" id="psub">Prépare-toi en respirant calmement (~3-4/min). Jamais d’hyperventilation. Appuie quand tu es prêt.</div>'+
+    '<div class="counters" style="margin-top:6px"><div><b id="cr">0</b>apnée(s)</div><div><b id="cn">'+cf.rounds+'</b>objectif</div></div>');
+  const phase=$('#phase'),timer=$('#ptimer'),sub=$('#psub');
+  function ctrl(h){$('#pctrl').innerHTML=h;}
+  function countdown(sec,cls){return new Promise(function(res){let left=sec;timer.textContent=left+'s';timer.className='bigtimer '+cls;
+    const iv=setInterval(function(){left--;timer.textContent=left+'s';if(left<=0){clearInterval(iv);timer.className='bigtimer';beep(560,0.08);vibe(15);res();}},1000);activeTimers.push(iv);});}
+  async function afterHold(d){
+    timer.textContent=d+'s';
+    if(cf.reduced>0){phase.textContent='Respiration réduite';sub.textContent='Minimise ta respiration.';await countdown(cf.reduced,'note-amber');}
+    if(cancelled)return;
+    phase.textContent='Récupère';sub.textContent='6 souffles nettoyants (courts, calmes), puis respiration nasale normale.';await countdown(cf.recover,'note-teal');
+    if(cancelled)return;
+    if(round>=cf.rounds){finish();return;}
+    phase.textContent='Prêt pour la suivante ?';timer.textContent='—';
+    ctrl('<button class="btn block primary" id="b">Apnée suivante</button>');$('#b').onclick=doHold;
+  }
+  function doHold(){
+    round++;$('#cr').textContent=round;
+    phase.textContent='Expire, pince le nez, marche en apnée';beep(500,0.12);vibe(20);
+    const t0=Date.now();const iv=setInterval(function(){timer.textContent=Math.floor((Date.now()-t0)/1000)+'s';},200);activeTimers.push(iv);
+    sub.innerHTML='Marche jusqu’à une faim d’air <b>moyenne à forte</b>.';
+    ctrl('<button class="btn block amber" id="b">Reprends (faim d’air)</button>');
+    $('#b').onclick=function(){clearInterval(iv);const d=Math.round((Date.now()-t0)/1000);holds.push(d);beep(620,0.1);vibe(25);afterHold(d);};
+  }
+  function finish(){logSession(e.name);
+    const avg=holds.length?Math.round(holds.reduce(function(a,b){return a+b;},0)/holds.length):0;
+    phase.textContent='Séance terminée';timer.textContent='✓';timer.className='bigtimer';
+    var _mx=holds.length?Math.max.apply(null,holds):0;if(_mx)logApnea(_mx);
+    sub.innerHTML=holds.length+' apnées · moyenne '+avg+'s · max '+(holds.length?Math.max.apply(null,holds):0)+'s';
+    ctrl('<button class="btn block primary" onclick="closePlayer()">Fermer</button>');
+  }
+  ctrl('<button class="btn block primary" id="b">Commencer</button>');$('#b').onclick=doHold;
+}
+
+function playTable(e){
+  const bolt=lastBolt(),ret=load('sf_retmax',null);
+  let hold=ret?Math.round(ret/2):(bolt||20);
+  let rounds=8,rest0=Math.max(40,Math.round(75-0.7*(bolt||20)));
+  playerShell('Table CO₂',
+    '<div class="phase">Réglages</div>'+
+    '<div class="subt">Apnée constante, repos décroissant (−5 s). Respiration normale aux récups.</div>'+
+    '<div class="block" style="width:100%;max-width:340px;text-align:left">'+
+    '<div class="kv"><span>Durée d’apnée</span><b><span id="vh">'+hold+'</span> s</b></div><input type="range" min="10" max="90" value="'+hold+'" id="rh" style="width:100%">'+
+    '<div class="row" style="margin:8px 0 4px"><button class="btn sm" id="bbolt">= BOLT ('+(bolt||'?')+')</button><button class="btn sm" id="bret">= 50 % max ('+(ret?Math.round(ret/2):'?')+')</button></div>'+
+    '<div class="kv"><span>Nombre d’apnées</span><b><span id="vr">'+rounds+'</span></b></div><input type="range" min="4" max="12" value="'+rounds+'" id="rr" style="width:100%">'+
+    '<div class="kv"><span>Repos de départ</span><b><span id="vrest">'+rest0+'</span> s</b></div><input type="range" min="20" max="90" value="'+rest0+'" id="rrest" style="width:100%"></div>');
+  $('#rh').oninput=function(ev){hold=+ev.target.value;$('#vh').textContent=hold;};
+  $('#rr').oninput=function(ev){rounds=+ev.target.value;$('#vr').textContent=rounds;};
+  $('#rrest').oninput=function(ev){rest0=+ev.target.value;$('#vrest').textContent=rest0;};
+  $('#bbolt').onclick=function(){if(bolt){hold=bolt;$('#rh').value=bolt;$('#vh').textContent=bolt;}};
+  $('#bret').onclick=function(){if(ret){hold=Math.round(ret/2);$('#rh').value=hold;$('#vh').textContent=hold;}};
+  $('#pctrl').innerHTML='<button class="btn block amber" id="pgo">Lancer la table</button>';
+  $('#pgo').onclick=function(){runTable(hold,rounds,rest0);};
+}
+async function runTable(hold,rounds,rest0){
+  $('#pstage').innerHTML=
+    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb co2" id="orb" style="transform:scale(.7)"></div></div>'+
+    '<div class="phase" id="phase">Prêt</div><div class="bigtimer" id="ptimer">—</div><div class="subt" id="psub"></div>'+
+    '<div class="counters"><div><b id="cr">0</b>/ '+rounds+' apnées</div><div><b id="crest">'+rest0+'</b>repos (s)</div></div>';
+  $('#pctrl').innerHTML='<button class="btn block" onclick="closePlayer()">Arrêter</button>';
+  const orb=$('#orb');
+  function cd(sec,label,cls,grow){return new Promise(function(res){
+    let left=sec;$('#phase').textContent=label;$('#ptimer').textContent=left+'s';$('#ptimer').className='bigtimer '+(cls||'');
+    if(orb){orb.style.transitionDuration='1s';orb.style.transform='scale('+(grow?0.65:0.95)+')';}
+    beep(grow?500:600,0.1);vibe(20);
+    const iv=setInterval(function(){left--;$('#ptimer').textContent=left+'s';if(left<=0){clearInterval(iv);res();}},1000);activeTimers.push(iv);
+  });}
+  try{
+    await sleep(500);
+    for(let i=0;i<rounds;i++){
+      $('#cr').textContent=i+1;const rest=Math.max(10,rest0-5*i);$('#crest').textContent=rest;
+      await cd(hold,'Apnée','note-amber',true);if(cancelled)return;
+      if(i<rounds-1){$('#psub').textContent='6 souffles nettoyants, puis respiration normale. Pas d’hyperventilation.';await cd(rest,'Repos','note-teal',false);if(cancelled)return;}
+    }
+    beep(880,0.18);vibe([30,40,30]);logSession('Table CO₂');
+    $('#phase').textContent='Table terminée';$('#ptimer').textContent='✓';$('#ptimer').className='bigtimer';
+    $('#psub').textContent='Récup : 6 souffles nettoyants, reste assis 15 s. Une seule table/jour.';
+    $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer()">Fermer</button>';
+  }catch(x){}
+}
+
+function playO2Table(e){
+  const bolt=lastBolt(),ret=load('sf_retmax',null);
+  let hold0=ret?Math.round(ret/2):(bolt||20);
+  let rounds=6,rest=Math.max(60,Math.round(90-0.5*(bolt||20))),step=10;
+  playerShell('Table O₂',
+    '<div class="phase">Réglages</div>'+
+    '<div class="subt">Apnée <b>croissante</b> (+<span id="vst">'+step+'</span> s), repos <b>fixe</b>. La SpO₂ baisse — accompagné conseillé.</div>'+
+    '<div class="block" style="width:100%;max-width:340px;text-align:left">'+
+    '<div class="kv"><span>Apnée de départ</span><b><span id="vh">'+hold0+'</span> s</b></div><input type="range" min="10" max="90" value="'+hold0+'" id="rh" style="width:100%">'+
+    '<div class="row" style="margin:8px 0 4px"><button class="btn sm" id="bbolt">= BOLT ('+(bolt||'?')+')</button><button class="btn sm" id="bret">= 50 % max ('+(ret?Math.round(ret/2):'?')+')</button></div>'+
+    '<div class="kv"><span>Nombre d’apnées</span><b><span id="vr">'+rounds+'</span></b></div><input type="range" min="4" max="10" value="'+rounds+'" id="rr" style="width:100%">'+
+    '<div class="kv"><span>Incrément / apnée</span><b><span id="vstep">'+step+'</span> s</b></div><input type="range" min="5" max="20" step="5" value="'+step+'" id="rstep" style="width:100%">'+
+    '<div class="kv"><span>Repos fixe</span><b><span id="vrest">'+rest+'</span> s</b></div><input type="range" min="30" max="120" value="'+rest+'" id="rrest" style="width:100%"></div>');
+  $('#rh').oninput=function(ev){hold0=+ev.target.value;$('#vh').textContent=hold0;};
+  $('#rr').oninput=function(ev){rounds=+ev.target.value;$('#vr').textContent=rounds;};
+  $('#rstep').oninput=function(ev){step=+ev.target.value;$('#vstep').textContent=step;$('#vst').textContent=step;};
+  $('#rrest').oninput=function(ev){rest=+ev.target.value;$('#vrest').textContent=rest;};
+  $('#bbolt').onclick=function(){if(bolt){hold0=bolt;$('#rh').value=bolt;$('#vh').textContent=bolt;}};
+  $('#bret').onclick=function(){if(ret){hold0=Math.round(ret/2);$('#rh').value=hold0;$('#vh').textContent=hold0;}};
+  $('#pctrl').innerHTML='<button class="btn block amber" id="pgo">Lancer la table</button>';
+  $('#pgo').onclick=function(){runO2Table(hold0,rounds,rest,step);};
+}
+async function runO2Table(hold0,rounds,rest,step){
+  $('#pstage').innerHTML=
+    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb co2" id="orb" style="transform:scale(.7)"></div></div>'+
+    '<div class="phase" id="phase">Prêt</div><div class="bigtimer" id="ptimer">—</div><div class="subt" id="psub"></div>'+
+    '<div class="counters"><div><b id="cr">0</b>/ '+rounds+' apnées</div><div><b id="chold">'+hold0+'</b>apnée (s)</div></div>';
+  $('#pctrl').innerHTML='<button class="btn block" onclick="closePlayer()">Arrêter</button>';
+  const orb=$('#orb');
+  function cd(sec,label,cls,grow){return new Promise(function(res){
+    let left=sec;$('#phase').textContent=label;$('#ptimer').textContent=left+'s';$('#ptimer').className='bigtimer '+(cls||'');
+    if(orb){orb.style.transitionDuration='1s';orb.style.transform='scale('+(grow?0.65:0.95)+')';}
+    beep(grow?500:600,0.1);vibe(20);
+    const iv=setInterval(function(){left--;$('#ptimer').textContent=left+'s';if(left<=0){clearInterval(iv);res();}},1000);activeTimers.push(iv);
+  });}
+  try{
+    await sleep(500);
+    for(let i=0;i<rounds;i++){
+      const hold=hold0+step*i;$('#cr').textContent=i+1;$('#chold').textContent=hold;
+      await cd(hold,'Apnée','note-amber',true);if(cancelled)return;
+      if(i<rounds-1){$('#psub').textContent='6 souffles nettoyants, puis respiration normale. Repos fixe, pas d’hyperventilation.';await cd(rest,'Repos','note-teal',false);if(cancelled)return;}
+    }
+    beep(880,0.18);vibe([30,40,30]);logSession('Table O₂');
+    $('#phase').textContent='Table terminée';$('#ptimer').textContent='✓';$('#ptimer').className='bigtimer';
+    $('#psub').textContent='Récup : 6 souffles nettoyants, reste assis 15 s. Une seule table/jour.';
+    $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer()">Fermer</button>';
+  }catch(x){}
+}
+function playReps(e){
+  const cf=e.reps;let set=0;
+  playerShell(e.name,
+    '<div class="phase" id="phase">'+cf.cue+'</div>'+
+    '<div class="bigtimer" id="ptimer" style="font-size:48px">Série 0/'+cf.sets+'</div>'+
+    '<div class="subt" id="psub">À bas volume : expire normalement, retiens, puis effort jusqu’à une faim d’air <b>modérée</b>.</div>'+
+    '<div class="counters"><div><b id="cs">0</b>/ '+cf.sets+' séries</div></div>');
+  function ctrl(h){$('#pctrl').innerHTML=h;}
+  function finish(){logSession(e.name);
+    $('#phase').textContent='Séance terminée';$('#ptimer').textContent='✓';
+    $('#psub').textContent=cf.sets+' séries effectuées. Récupère bien.';
+    ctrl('<button class="btn block primary" onclick="closePlayer()">Fermer</button>');
+  }
+  function startSet(){
+    set++;$('#cs').textContent=set;$('#ptimer').textContent='Série '+set+'/'+cf.sets;
+    $('#phase').textContent=cf.cue;$('#psub').innerHTML='Effort en apnée. Stoppe à une faim d’air <b>modérée</b> (jamais maximale).';
+    beep(500,0.12);vibe(20);
+    ctrl('<button class="btn block amber" id="b">Fin de l’apnée</button>');
+    $('#b').onclick=function(){beep(620,0.1);vibe(25);
+      $('#phase').textContent='Récupération';$('#psub').textContent='Respiration normale : '+cf.recover+'. Souffles calmes, pas d’hyperventilation.';
+      if(set>=cf.sets){finish();return;}
+      ctrl('<button class="btn block primary" id="b">Série suivante</button>');$('#b').onclick=startSet;
+    };
+  }
+  ctrl('<button class="btn block primary" id="b">Commencer la 1re série</button>');$('#b').onclick=startSet;
+}
+
+function renderTrack(v){
+  v.innerHTML='';
+  v.appendChild(el('div','kicker','Progression'));
+  v.appendChild(el('h1','h-hero display','Suivi'));
+  const c=el('div','card');const last=boltHist.slice(-14);
+  if(last.length){
+    const max=Math.max.apply(null,[40].concat(last.map(function(b){return b.s;})));
+    let bars='<div class="spark">';
+    last.forEach(function(b){bars+='<div class="b" style="height:'+Math.max(6,b.s/max*100)+'%"><small>'+b.s+'</small></div>';});
+    bars+='</div>';
+    c.innerHTML='<div class="field-t">BOLT — 14 dernières mesures</div>'+bars+
+      '<div class="muted" style="margin-top:14px">Dernier : <b style="color:var(--ink)">'+lastBolt()+'s</b> · moyenne : <b style="color:var(--ink)">'+Math.round(last.reduce(function(a,b){return a+b.s;},0)/last.length)+'s</b></div>';
+  }else{
+    c.innerHTML='<div class="muted">Aucune mesure encore. Fais ton premier test BOLT pour suivre ta progression.</div>';
+    const b=el('button','btn primary block','Faire le test BOLT');b.style.marginTop='12px';b.onclick=function(){go('detail','bolt');};c.appendChild(b);
+  }
+  v.appendChild(c);
+  function sparkCard(title,arr,unit,color){
+    var pts=arr.filter(function(x){return x!=null;});
+    var card=el('div','card');card.style.marginTop='12px';
+    if(!pts.length){card.innerHTML='<div class="field-t">'+title+'</div><div class="muted">Aucune donnée encore. Renseigne-la dans le Journal du jour ci-dessous, ou via un exercice guidé.</div>';return card;}
+    var last=pts.slice(-14);var mx=Math.max.apply(null,last);
+    var bars='<div class="spark">';
+    last.forEach(function(v){var h=mx>0?Math.max(6,v/mx*100):6;bars+='<div class="b" style="height:'+h+'%;background:linear-gradient('+color+','+color+'88)"><small>'+v+'</small></div>';});
+    bars+='</div>';
+    card.innerHTML='<div class="field-t">'+title+'</div>'+bars+'<div class="muted" style="margin-top:12px">Dernier : <b style="color:var(--ink)">'+pts[pts.length-1]+unit+'</b></div>';
+    return card;
+  }
+  v.appendChild(sparkCard('Apnée max (s)',metrics.map(function(m){return m.apnea!=null?m.apnea:null;}),'s','#2db6a4'));
+  v.appendChild(sparkCard('SpO₂ min (%)',metrics.map(function(m){return m.spo2!=null?m.spo2:null;}),'%','#e0922f'));
+  var tm=todayMetric()||{};
+  var _ist='width:82px;text-align:right;background:var(--card2);border:1px solid var(--line2);border-radius:8px;color:var(--ink);padding:6px;font-family:inherit;font-size:14px';
+  var form=el('div','card');form.style.marginTop='12px';
+  form.innerHTML='<div class="field-t">Journal du jour</div>'+
+    '<div class="kv"><span>Apnée max (s)</span><input id="mAp" type="number" inputmode="numeric" value="'+(tm.apnea!=null?tm.apnea:'')+'" style="'+_ist+'"></div>'+
+    '<div class="kv"><span>SpO₂ min (%)</span><input id="mSp" type="number" inputmode="numeric" value="'+(tm.spo2!=null?tm.spo2:'')+'" style="'+_ist+'"></div>'+
+    '<div class="kv"><span>Faim d’air (1-5)</span><input id="mAir" type="number" inputmode="numeric" min="1" max="5" value="'+(tm.air!=null?tm.air:'')+'" style="'+_ist+'"></div>'+
+    '<div class="kv" style="border-bottom:none"><span>RPE (1-10)</span><input id="mRpe" type="number" inputmode="numeric" min="1" max="10" value="'+(tm.rpe!=null?tm.rpe:'')+'" style="'+_ist+'"></div>';
+  var msb=el('button','btn primary block','Enregistrer le jour');msb.style.marginTop='10px';form.appendChild(msb);
+  v.appendChild(form);
+  msb.onclick=function(){
+    function num(id){var x=document.getElementById(id).value;return x===''?null:+x;}
+    var o={},a=num('mAp'),sp=num('mSp'),ai=num('mAir'),rp=num('mRpe');
+    if(a!=null)o.apnea=a;if(sp!=null)o.spo2=sp;if(ai!=null)o.air=ai;if(rp!=null)o.rpe=rp;
+    saveMetric(o);beep(740,0.12);vibe(30);go('track');
+  };
+  v.appendChild(el('div','section-t','Séances récentes'));
+  if(sessions.length){
+    sessions.slice(-12).reverse().forEach(function(s){
+      const d=new Date(s.t);const r=el('div','ex');r.style.cursor='default';
+      r.innerHTML='<div class="badge" style="background:#2db6a41f;color:var(--teal)">✓</div>'+
+        '<div class="meta"><b>'+s.name+'</b><small>'+d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+'</small></div>';
+      v.appendChild(r);
+    });
+    const clr=el('button','btn sm ghost','Effacer l’historique');clr.style.marginTop='8px';
+    clr.onclick=function(){if(confirm('Effacer toutes les données locales (BOLT + séances + journal) ?')){boltHist=[];sessions=[];metrics=[];save('sf_bolt',[]);save('sf_sess',[]);save('sf_metrics',[]);go('track');refreshChip();}};
+    v.appendChild(clr);
+  }else v.appendChild(el('p','muted','Tes séances guidées apparaîtront ici.'));
+}
+
+function renderProg(v){
+  v.innerHTML='';
+  const back=el('button','btn sm ghost','‹ Méthode');back.onclick=()=>go('info');v.appendChild(back);
+  v.appendChild(el('div','section-t','Programme apnée · 12 semaines'));
+  v.appendChild(el('div','muted','Objectif : progresser vers un niveau d’apnéiste confirmé (apnées plus longues, apnée dynamique régulière) — le terrain où la littérature observe une réponse EPO / rate. Honnêteté : l’effet hématologique reste transitoire et l’altitude demeure la voie fiable. Vrais gains ici : tolérance CO₂/lactate, capacité à répéter les efforts, calme mental.'));
+  v.appendChild(el('div','safety','<b>Sécurité — non négociable.</b> Tout se fait <b>à sec, sur la terre ferme</b>. <b>Jamais</b> d’apnée dans l’eau ou à la surface sans encadrement certifié (la syncope hypoxique noie sans prévenir). Jamais d’hyperventilation avant une apnée. Apnées maximales : quelqu’un à côté. Stoppe aux <b>premières contractions fortes</b> / signaux d’alerte — jamais jusqu’au malaise. Contre-indications : maladie cardiovasculaire, hypertension non contrôlée, grossesse, épilepsie, diabète, anémie falciforme. <b>Avis médical avant de commencer.</b>'));
+  const phases=[
+   {t:'Phase 1 · Fondations & relâchement (sem. 1-4)',
+    goal:'Installer le calme, la respiration diaphragmatique et la tolérance au CO₂. Construire la base sans forcer.',
+    week:['<b>2×</b> Table CO₂ (app) — tolérance à la faim d’air','<b>2-3×</b> Apnea walk (app) — apnée dynamique douce','<b>1×</b> relâchement : respiration légère 10 min + 3-4 apnées faciles assises','BOLT chaque matin · 1 test de rétention max/sem (accompagné)'],
+    target:'Apnée max confortable ~1:30-2:30 · marche en apnée fluide · BOLT en hausse'},
+   {t:'Phase 2 · Tolérance à l’hypoxie (sem. 5-8)',
+    goal:'Apnées plus longues + apnée dynamique (jogging/corde à sauter) : c’est ici qu’apparaît la désaturation qui compte. Oxymètre de pouls conseillé.',
+    week:['<b>2×</b> « table O₂ » : 6-8 apnées, repos <b>fixe</b> (~2 min), durée <b>croissante</b>','<b>1-2×</b> Table CO₂ (entretien)','<b>2×</b> apnée dynamique : jogging léger ou corde, apnées 20→35 s, récup complète','1 test max/sem (accompagné)'],
+    target:'Apnée max ~2:30-3:30 · SpO₂ sous contrôle, descente <b>modérée</b> (jamais sous ~80 %, jamais en solo)'},
+   {t:'Phase 3 · Consolidation & intensité (sem. 9-12)',
+    goal:'Apnées longues et intenses + VHL haute intensité : le profil « long et intense » que la recherche associe à la réponse EPO. Maintien et réévaluation.',
+    week:['<b>2×</b> séance longue : montée en apnées max + table O₂','<b>2×</b> VHL haute intensité (app · jump squat/burpees) ou apnée dynamique','<b>1×</b> récupération : cohérence / soupir / respiration légère','Réévalue BOLT + apnée max en fin de cycle'],
+    target:'Apnée max ~3:00-4:00+ selon l’individu · apnée dynamique aisée · calme à forte faim d’air'},
+  ];
+  phases.forEach(function(p){
+    const b=el('div','block');
+    b.innerHTML='<div class="field-t">'+p.t+'</div>'+
+      '<div class="muted" style="margin-bottom:9px">'+p.goal+'</div>'+
+      '<div class="muted"><b>Semaine type</b><br>• '+p.week.join('<br>• ')+'</div>'+
+      '<div class="muted" style="margin-top:9px"><b>Cibles</b> · '+p.target+'</div>';
+    v.appendChild(b);
+  });
+  const m=el('div','block');
+  m.innerHTML='<div class="field-t">Repères & suivi</div><div class="muted">'+
+    '<b>Oxymètre</b> (phases 2-3) : pour <b>limiter</b> la désaturation, pas la chasser — pas sous ~80 %, jamais en solo.<br>'+
+    '<b>Progression</b> : ~+10 % de charge/semaine, 1 semaine allégée toutes les 4.<br>'+
+    '<b>Récupération</b> : sommeil, hydratation, fer/ferritine (un bilan sanguin est utile si tu vises l’hémato).<br>'+
+    'Si le BOLT chute ou que la fatigue s’installe : allège.</div>';
+  v.appendChild(m);
+  v.appendChild(el('div','disclaimer','Programme pédagogique, pas un protocole médical. Adapte-le à ta forme du jour et à ton encadrement. L’apnée en eau exige une formation freediving certifiée.'));
+}
+const SPCOL={recup:'#2db6a4',aero:'#4fb89e',tempo:'#cda13a',dur:'#e0922f',max:'#d65a40',base:'#3f9e86'};
+const SPORTS_APP=[
+ {name:'Trail',sub:'course',rows:[
+  {lvl:'aero',intens:'Facile · aérobie',tech:'Nasale, ventrale, silencieuse',son:'Silencieux',ryth:'3:3 (pas)',voie:'Nez',note:'Zone de base, économe.'},
+  {lvl:'tempo',intens:'Tempo · seuil',tech:'Nasale couplée aux pas',son:'Léger',ryth:'3:2 (pas)',voie:'Nez → bouche',note:'Ratio impair = alterne le pied (anti point de côté). Ouvrir la bouche ≈ ton seuil.'},
+  {lvl:'dur',intens:'Montée · dur',tech:'Expire franche sur la poussée',son:'« HA » léger',ryth:'2:2 → 2:1 (pas)',voie:'Bouche',note:'Pace pour garder le souffle pilotable.'},
+  {lvl:'recup',intens:'Récup',tech:'Expire longue, on fait redescendre',son:'« mmm » / silencieux',ryth:'≈ 4/6 s',voie:'Nez',note:'Revenir au calme vite entre les efforts.'}]},
+ {name:'Surf',sub:'ramage',rows:[
+  {lvl:'tempo',intens:'Ramage soutenu',tech:'Couplé aux coups de bras, expansion costale',son:'Silencieux',ryth:'in3 / out3 (coups)',voie:'Nez si possible',note:'Allongé le ventre est comprimé : cherche l’expire complète.'},
+  {lvl:'max',intens:'Sprint vague',tech:'Expire forcée sur la poussée',son:'« HA »',ryth:'sur le mouvement',voie:'Bouche',note:'Pas de ratio, puis duck dive.'},
+  {lvl:'max',intens:'Avant duck dive',tech:'Un souffle CALME, pas une goulée',son:'Silencieux',ryth:'—',voie:'Nez',note:'⚠ Jamais d’hyperventilation avant de passer sous l’eau.'}]},
+ {name:'Alpinisme',sub:'marche / altitude',rows:[
+  {lvl:'tempo',intens:'Tempo soutenu',tech:'Nasale couplée aux pas (rest step)',son:'Silencieux',ryth:'2:2 plat · 2:1–1:1 raide',voie:'Nez si possible',note:'Le nasal sert de jauge de seuil.'},
+  {lvl:'dur',intens:'Altitude · ressaut',tech:'Pressure breathing ponctuelle',son:'Lèvres pincées',ryth:'sur les pas durs',voie:'Bouche',note:'Monte un peu la SaO₂ mais coûte plus ; ponctuel. Ne sous-respire pas.'},
+  {lvl:'recup',intens:'Récup · pauses',tech:'Cohérence, expire longue',son:'« mmm » / silencieux',ryth:'5,5 / 5,5 s',voie:'Nez',note:'IMT en prépa, hors effort.'}]},
+ {name:'Escalade',sub:'voie / bloc',rows:[
+  {lvl:'aero',intens:'Voie facile',tech:'Souffle continu, expire audible sur mouv',son:'Silencieux → léger',ryth:'1 souffle / mouv',voie:'Nez',note:'Ancre l’habitude de respirer en grimpant.'},
+  {lvl:'tempo',intens:'Rési · continu',tech:'Rythme couplé aux mouvements, micro-souffle à chaque prise',son:'Léger appuyé',ryth:'expire sur traction',voie:'Nez → bouche',note:'Jamais bloquer. Dé-grippe en continu.'},
+  {lvl:'max',intens:'Crux · mouv max',tech:'Expire forcée sur la traction',son:'« HA » ouvert',ryth:'sur le mouvement',voie:'Bouche',note:'Micro-apnée seulement sur un dyno.'},
+  {lvl:'recup',intens:'Rest · shake',tech:'Expire longue freinée, dé-grippe',son:'« mmm » / lèvres pincées',ryth:'≈ 4/6 s',voie:'Nez',note:'Bloquer ici rallonge la récup.'},
+  {lvl:'max',intens:'Gaz · peur',tech:'Soupir physiologique avant de réengager',son:'Soupir',ryth:'double inspi + longue expi',voie:'Nez → bouche',note:'Calme le mental, te laisse évaluer.'}]},
+ {name:'Repos & quotidien',sub:'détente, sommeil, marche',rows:[
+  {lvl:'recup',intens:'Repos · récup nerveuse',tech:'Cohérence cardiaque',son:'Silencieux',ryth:'5,5 / 5,5 s',voie:'Nez',note:'~0,1 Hz, maximise la VRC.'},
+  {lvl:'recup',intens:'Avant le sommeil',tech:'Récupération 4-7-8',son:'Léger',ryth:'4 / 7 / 8 s',voie:'Nez → bouche',note:'Expire longue = parasympathique.'},
+  {lvl:'base',intens:'Vie quotidienne',tech:'Respiration nasale légère 24/7',son:'Silencieux',ryth:'spontané, réduit',voie:'Nez',note:'Le pilier : bouche fermée, langue au palais.'},
+  {lvl:'base',intens:'Marche simple',tech:'Nasale légère, ou carrée calée sur les pas',son:'Silencieux',ryth:'3:3, ou 4-4-4-4 en pas',voie:'Nez',note:'Calme / focus, allure tranquille seulement.'}]},
+ {name:'Récup post-effort',sub:'transversal · McKeown',rows:[
+  {lvl:'recup',intens:'Dès l’arrêt',tech:'Revenir au nez, calmer le souffle',son:'Silencieux',ryth:'souffle réduit',voie:'Nez',note:'Effet Bohr. Option : rétention de récup douce, reste assis.'}]},
+];
+function renderSport(v){
+  v.innerHTML='';
+  var back=el('button','btn sm ghost','‹ Accueil');back.onclick=function(){go('home');};v.appendChild(back);
+  v.appendChild(el('div','kicker','Aide-mémoire de terrain'));
+  v.appendChild(el('h1','h-hero display','Respirer par sport'));
+  v.appendChild(el('p','lead','Quel souffle, quel son, quel rythme selon l’effort. À adapter à la sensation, pas à la lettre.'));
+  v.appendChild(el('div','safety','<b>Principe.</b> Expire sur l’effort, relâche en récup, ne bloque jamais le souffle — sauf micro-apnée d’un mouvement explosif. Jamais d’hyperventilation avant immersion.'));
+  SPORTS_APP.forEach(function(sp){
+    v.appendChild(el('div','section-t',sp.name+' — '+sp.sub));
+    sp.rows.forEach(function(r){
+      var col=SPCOL[r.lvl];
+      var card=el('div','card');card.style.cssText='margin-bottom:10px;border-left:3px solid '+col;
+      card.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">'+
+        '<span style="font-weight:700;font-size:12.5px;background:'+col+';color:#04201d;padding:3px 10px;border-radius:999px">'+r.intens+'</span>'+
+        '<span class="muted" style="font-size:11px">'+r.voie+'</span></div>'+
+        '<div class="display" style="font-size:15px;margin:9px 0">'+r.tech+'</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:'+(r.note?'8px':'0')+'">'+
+        '<span class="boltchip" style="font-size:12px"><small>Son</small> '+r.son+'</span>'+
+        '<span class="boltchip" style="font-size:12px"><small>Rythme</small> '+r.ryth+'</span></div>'+
+        (r.note?'<div class="muted" style="font-size:12.5px">'+r.note+'</div>':'');
+      v.appendChild(card);
+    });
+  });
+  v.appendChild(el('div','src','Réf. : McKeown / Oxygen Advantage · Woorons (VHL) · Balban 2023 (soupir) · Weitzberg & Lundberg 2002 (NO) · Lehrer & Vaschillo (cohérence) · revues nasal à l’effort & couplage souffle-foulée · sources apnée.'));
+}
+function renderInfo(v){
+  v.innerHTML='';
+  v.appendChild(el('div','kicker','Repères & méthode'));
+  v.appendChild(el('h1','h-hero display','La méthode'));
+  const c=el('div','card');
+  c.innerHTML='<div class="field-t">Interpréter le BOLT (le matin)</div>'+
+    '<div class="scalebar"><div style="background:#b5462f">&lt;10</div><div style="background:#c86a3a">10–20</div>'+
+    '<div style="background:#c8902f">20–25</div><div style="background:#7faf57">25–30</div>'+
+    '<div style="background:#3f9e86">30–40</div><div style="background:#2db6a4">40+</div></div>'+
+    '<div class="muted" style="margin-top:10px">25 s = seuil minimum · 40 s = optimal. Vise +1 à +2 s/semaine. S’il baisse, allège (respiration légère, sommeil, stress). Les apnées s’introduisent à partir de ~20 s.</div>';
+  v.appendChild(c);
+  const how=el('div','block');
+  how.innerHTML='<div class="field-t">Les 3 leviers</div><div class="muted">1 · Réduire les pertes de CO₂ (respiration nasale, légère, lente).<br>2 · Augmenter la tolérance au CO₂ (légère, apnées, table CO₂).<br>3 · Simuler l’altitude <b>au niveau de la mer, sans matériel</b> : apnées + VHL <b>sur l’expiration</b> (bas volume) → SpO₂ ~87 %, proche de la haute altitude.</div>';
+  v.appendChild(how);
+  const epo=el('div','block');
+  epo.innerHTML='<div class="field-t">EPO &amp; altitude — au juste</div><div class="muted">L’EPO est surtout déclenchée par l’<b>hypoxie</b> (rein, voie HIF). La voie fiable = <b>altitude</b> réelle ou simulée. L’<b>apnée</b> provoque une contraction de la rate (↑ hémoglobine transitoire) et une hausse d’EPO jusqu’à ~5 h après l’effort — mais de façon nette seulement avec des apnées <b>longues et intenses</b>, chez des pratiquants <b>expérimentés</b>. Tes apnées courtes (VHL) donnent surtout des gains <b>métaboliques</b> (CO₂/lactate, RSA), pas un vrai gain hématologique durable.</div>';
+  v.appendChild(epo);
+  const pb=el('button','btn block primary','Programme apnée (12 semaines)');pb.style.marginTop='12px';pb.onclick=()=>go('prog');
+  v.appendChild(pb);
+  v.appendChild(el('div','src','Réf. EPO/apnée : de Bruijn 2008 (+24 % EPO) · Elia/Kjeld 2015-2019 (élites) · Bouten 2019-2025 (rate, revue) · Précart/Woorons 2025 (VHL).'));
+  const anch=el('div','block');
+  anch.innerHTML='<div class="field-t">3 ancrages quotidiens</div><div class="muted">• Réveil : test BOLT, au repos<br>• Journée : respiration nasale, légère<br>• Soir : expiration longue (4-7-8 / cohérence)</div>';
+  v.appendChild(anch);
+  v.appendChild(el('div','safety','<b>Sécurité générale.</b> Jamais d’apnée dans l’eau ou en conduisant · jamais d’hyperventilation avant une apnée · faim d’air <b>tolérable</b>, jamais la suffocation · l’apnée en mouvement près du sol et idéalement accompagné · stop si vertige. Avis médical avant les apnées si grossesse, hypertension non contrôlée, maladie cardiovasculaire, épilepsie, diabète, anémie falciforme, troubles paniques.'));
+  v.appendChild(el('div','section-t','Réglages'));
+  const sset=el('div','block');
+  sset.innerHTML='<div class="toggle"><span>Sons (bips de phase)</span><div class="sw '+(settings.sound?'on':'')+'" id="swSound"></div></div>'+
+    '<div class="toggle" style="border-bottom:none"><span>Vibrations</span><div class="sw '+(settings.vibe?'on':'')+'" id="swVibe"></div></div>';
+  v.appendChild(sset);
+  $('#swSound').onclick=function(){settings.sound=!settings.sound;save('sf_set',settings);$('#swSound').classList.toggle('on',settings.sound);if(settings.sound)beep();};
+  $('#swVibe').onclick=function(){settings.vibe=!settings.vibe;save('sf_set',settings);$('#swVibe').classList.toggle('on',settings.vibe);if(settings.vibe)vibe(30);};
+  var _sb=el('button','btn sm ghost','Revoir les règles de sécurité');_sb.style.marginTop='12px';_sb.onclick=function(){safetyGate(true);};v.appendChild(_sb);
+  v.appendChild(el('div','src','Sources : P. McKeown — Oxygen Advantage (BOLT, respiration nasale, légère, apnées) · cohérence ~0,1 Hz (Lehrer & Vaschillo) · soupir cyclique : Balban et al., Cell Reports Medicine 2023 · fredonnement/NO : Weitzberg & Lundberg 2002 · hypoventilation VHL : Précart, Woorons et al., Sports Med - Open 2025 · bande costale : feedback latéral (Functional Movement Systems).'));
+  v.appendChild(el('div','disclaimer','Application pédagogique. Ne remplace pas un avis médical. Tes données restent sur cet appareil (stockage local).'));
+}
+
+const SAFETY=[
+ ['Jamais dans l’eau seul','En t’entraînant seul, toujours <b>au sec</b> : ça apporte quasiment tous les bénéfices sans le risque de noyade. Le statique/dynamique en eau et la profondeur exigent un binôme formé au sauvetage.'],
+ ['Jamais d’hyperventilation','Même 3-4 grandes respirations rapides masquent le signal de respirer et peuvent provoquer une syncope hypoxique. Prépare-toi <b>calmement</b> (~3-4/min, expire ≥ inspire).'],
+ ['Récupère après chaque tenue','Dès la reprise : 6 souffles nettoyants (courts, ~1 s) et reste <b>assis 15 s</b>. Un malaise peut survenir 10-15 s après avoir recommencé à respirer.'],
+ ['Faim d’air tolérable','Stoppe aux premières contractions fortes ou au moindre vertige. Jamais jusqu’au malaise.'],
+ ['Avis médical','Maladie cardiovasculaire, hypertension non contrôlée, grossesse, épilepsie, diabète, anémie falciforme, troubles paniques → avis médical avant les apnées.'],
+];
+function safetyGate(force){
+  if(!force && load('sf_safety',false))return;
+  const o=el('div','overlay');
+  const rows=SAFETY.map(function(s){return '<div class="srow"><span class="ic">!</span><div><b>'+s[0]+'</b><br>'+s[1]+'</div></div>';}).join('');
+  o.innerHTML='<div class="sheet"><div class="kicker" style="color:#f3a48f">Sécurité — à lire</div><h2 class="display">Avant de commencer</h2>'+rows+
+    '<div class="muted" style="margin:12px 0 14px">Contenu pédagogique : ne remplace ni une formation apnée certifiée, ni un avis médical.</div>'+
+    '<button class="btn block primary" id="ackBtn">J’ai compris</button></div>';
+  document.body.appendChild(o);
+  o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
+}
+go('home');refreshChip();safetyGate();
+</script>
+</body>
+</html>
