@@ -103,6 +103,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   transform:scale(.55);transition:transform 4s ease-in-out}
 .orb.co2{background:radial-gradient(circle at 38% 34%, #f2b566 0%, var(--amber) 40%, var(--amberD) 100%);box-shadow:0 0 60px rgba(224,146,47,.35), inset 0 0 40px rgba(0,0,0,.2)}
 .orb-ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(255,255,255,.12)}
+.orb-count{position:absolute;inset:0;display:grid;place-items:center;font-family:"Fraunces",Georgia,serif;font-size:48px;color:#e9f1ee;pointer-events:none;text-shadow:0 1px 5px rgba(0,0,0,.45)}
+.orb.holding{box-shadow:0 0 60px rgba(45,182,164,.5), inset 0 0 40px rgba(0,0,0,.2), 0 0 0 3px rgba(255,255,255,.28)}
+.orb.co2.holding{box-shadow:0 0 60px rgba(224,146,47,.5), inset 0 0 40px rgba(0,0,0,.2), 0 0 0 3px rgba(255,255,255,.28)}
 .phase{font-family:"Fraunces";font-size:30px;line-height:1.1}
 .bigtimer{font-family:"Fraunces";font-size:74px;line-height:1;letter-spacing:1px}
 .subt{color:var(--mut);font-size:14px;max-width:340px;line-height:1.5}
@@ -365,6 +368,33 @@ const EX=[
   safety:'Feedback, pas restriction : jamais au point de gêner le souffle.', player:'pacer',
   pacer:{kind:'teal',phases:[{l:'Inspire (pousse les côtes)',d:4,k:'in'},{l:'Expire (relâche)',d:6,k:'out'}],secs:120,note:'Sens les côtes s’ouvrir latéralement contre la bande.'}},
 ];
+const EXPLAIN={
+ bolt:"Mesure ta tolérance au CO₂ et la qualité de ton souffle. Plus le score monte, mieux tu supportes le manque d’air — donc plus tu respires efficacement, au repos comme à l’effort. C’est ta jauge quotidienne pour calibrer l’entraînement.",
+ retmax:"Apnée volontaire jusqu’aux fortes contractions pour situer ta capacité du moment. Elle sert de référence : la moitié de ta durée donne la base de tes tables CO₂.",
+ expmax:"Expiration la plus longue et contrôlée possible : elle travaille le pilotage du diaphragme et t’apprend à sentir la fin de l’expiration, utile pour toutes les respirations lentes.",
+ light:"Le cœur de la méthode. En respirant un peu moins que d’habitude (souffles plus petits), tu laisses monter légèrement le CO₂ et tu entraînes ton corps à mieux le tolérer. Garde les souffles minuscules et silencieux : c’est le volume réduit qui compte, pas un tempo précis.",
+ apnea:"Marche en apnée après une expiration : le manque d’air simule un léger effet d’altitude et muscle ta tolérance au CO₂ et à l’hypoxie. La reprise minimale (petits souffles) évite de tout relâcher d’un coup.",
+ unblock:"Le CO₂ accumulé pendant la rétention dilate les vaisseaux du nez et le débouche naturellement. Faim d’air moyenne-forte, puis reprise en 2-3 souffles calmes ; le nez se stabilise surtout avec une pratique régulière.",
+ unblock_sq:"Même principe que la décongestion, mais le mouvement (squats) fait monter le CO₂ plus vite : utile quand le nez est très bouché.",
+ co2table:"Apnées de durée constante avec un repos qui raccourcit à chaque tour : tu passes de plus en plus de temps avec un CO₂ élevé, donc tu apprends à tolérer le « besoin de respirer ». Peu d’hypoxie.",
+ o2table:"Apnées de plus en plus longues avec un repos fixe : c’est la table qui fait descendre l’oxygène, pour t’habituer à l’hypoxie (stimulus type altitude). L’exercice le plus exigeant — un seul par jour.",
+ coh:"Respirer à ~6/min (5,5 s de chaque côté) synchronise cœur et souffle à la fréquence de résonance : ça maximise la variabilité cardiaque, calme et améliore la récupération.",
+ sigh:"Deux inspirations enchaînées rouvrent les alvéoles, puis une longue expiration évacue le CO₂ et active le parasympathique. C’est le moyen le plus rapide de faire redescendre le stress.",
+ box:"Quatre temps égaux (inspire, retiens, expire, pause) donnent un motif régulier qui calme le système nerveux et aide à se concentrer. Outil de calme et de focus — avant l’effort ou en marche facile, pas pour l’effort intense (les tenues bridant la ventilation).",
+ "478":"L’expiration très longue (8 s) domine le cycle et bascule le corps vers le repos : idéal le soir pour s’endormir.",
+ bhramari:"Le fredonnement fait vibrer les voies nasales et multiplie l’oxyde nitrique (~×15), ce qui aide à décongestionner et à calmer. L’expiration s’allonge naturellement, en restant 100 % nasale.",
+ nadi:"Alterner les narines ralentit et équilibre le souffle : un exercice de recentrage simple, sans forcer.",
+ vhl:"Sprints en retenant le souffle à bas volume pulmonaire : la baisse d’oxygène et la hausse de CO₂ améliorent ta capacité à répéter les efforts intenses (tampon lactique, RSA).",
+ squat:"Squats en apnée à bas volume : tolérance au CO₂ et au lactate, plus un travail des jambes. Stoppe à une faim d’air moyenne-forte, jamais maximale.",
+ pushup:"Pompes en apnée : même logique que les squats, orientée haut du corps et gainage.",
+ pullup:"Tractions en apnée, sous-maximales et encadrées : risque de chute si malaise, donc jamais en solo et barre basse.",
+ vhl_hi:"Efforts explosifs (jump squats, burpees) en apnée à bas volume : fort stimulus type altitude et tolérance lactate/CO₂. Risque de syncope — faim d’air modérée seulement, récup complète, jamais en solo au début.",
+ nasal:"Respirer par le nez en permanence filtre, humidifie et ajoute une résistance naturelle qui entraîne ta tolérance au CO₂ 24 h/24. C’est le pilier discret de toute la méthode.",
+ tape:"Idée de favoriser le nez la nuit — mais preuve limitée et risque d’asphyxie si le nez n’est pas dégagé. Priorité au nasal de jour ; à n’envisager qu’avec un avis médical.",
+ nasex:"Garder le nez à l’effort facile/modéré développe l’économie et la tolérance au CO₂ à l’exercice. Ouvre la bouche seulement quand l’intensité devient vraiment élevée.",
+ imt:"Renforcer les muscles inspiratoires contre une résistance (appareil) réduit leur coût en oxygène — utile en altitude et à l’effort. Distinct du travail CO₂.",
+ band:"Une bande souple autour des côtes te donne un repère pour apprendre l’expansion latérale 360° : tu respires en poussant les côtes vers l’extérieur, poitrine et épaules calmes."
+};
 function exById(id){return EX.find(e=>e.id===id);}
 function exByCat(c){return EX.filter(e=>e.cat===c);}
 
@@ -464,6 +494,7 @@ function renderDetail(v,id){
     '<div><div class="kicker" style="color:'+cat.col+'">'+cat.name+'</div><h1 style="font-size:24px;margin-top:3px">'+e.name+'</h1></div>';
   v.appendChild(head);
   v.appendChild(el('p','lead',e.benefit));
+  if(EXPLAIN[e.id]){var _ex=el('div','block');_ex.innerHTML='<div class="field-t">En clair</div><div class="muted">'+EXPLAIN[e.id]+'</div>';v.appendChild(_ex);}
   const kv=el('div','block');
   kv.innerHTML='<div class="kv"><span>Fréquence</span><b style="color:'+cat.col+'">'+e.freq+'</b></div>'+
     '<div class="kv"><span>Dose</span><b>'+e.dose+'</b></div>'+
@@ -512,10 +543,10 @@ function sleep(ms){return new Promise(function(res,rej){const t=setTimeout(funct
 function playPacer(e){
   const cfg=e.pacer;
   playerShell(e.name,
-    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb '+(cfg.kind==='co2'?'co2':'')+'" id="orb"></div></div>'+
+    '<div class="orb-wrap"><div class="orb-ring"></div><div class="orb '+(cfg.kind==='co2'?'co2':'')+'" id="orb"></div><div class="orb-count" id="pcount"></div></div>'+
     '<div class="phase" id="phase">Prêt ?</div>'+
-    '<div class="bigtimer" id="ptimer" style="font-size:40px">'+(cfg.cycles?('0/'+cfg.cycles+' cycles'):fmt(cfg.secs))+'</div>'+
-    '<div class="subt" id="psub">'+(cfg.note||'')+'</div>');
+    '<div class="subt" id="psub">'+(cfg.note||'')+'</div>'+
+    '<div class="counters" style="margin-top:8px"><div><b id="ptimer">'+(cfg.cycles?('0/'+cfg.cycles):fmt(cfg.secs))+'</b>'+(cfg.cycles?'cycles':'restant')+'</div></div>');
   $('#pctrl').innerHTML='<button class="btn block primary" id="pgo">Commencer</button>';
   $('#pgo').onclick=function(){$('#pgo').remove();runPacer(e);};
 }
@@ -523,21 +554,31 @@ async function runPacer(e){
   const cfg=e.pacer,orb=$('#orb');
   let cycle=0,elapsed=0;const total=cfg.secs||0;
   const scaleFor=function(k){return k==='in'?1:k==='in2'?1.08:(k==='out'?0.55:(k==='hold'?1:0.55));};
+  async function phaseCountdown(sec){
+    let acc=0;$('#pcount').textContent=Math.ceil(sec);
+    while(acc<sec-0.001){
+      const step=Math.min(1,sec-acc);
+      await sleep(step*1000);acc+=step;
+      $('#pcount').textContent=Math.max(0,Math.ceil(sec-acc));
+      if(cfg.secs)$('#ptimer').textContent=fmt(Math.max(0,total-(elapsed+acc)));
+    }
+  }
   try{
     await sleep(400);
     while(!cancelled){
       for(let i=0;i<cfg.phases.length;i++){
-        const ph=cfg.phases[i];
+        const ph=cfg.phases[i],hold=(ph.k==='hold'||ph.k==='pause');
         $('#phase').textContent=ph.l;
+        orb.classList.toggle('holding',hold);
         beep(ph.k==='in'||ph.k==='in2'?720:ph.k==='out'?440:560,0.1);vibe(18);
         orb.style.transitionDuration=ph.d+'s';
         orb.style.transform='scale('+scaleFor(ph.k)+')';
-        await sleep(ph.d*1000);
+        await phaseCountdown(ph.d);
         elapsed+=ph.d;
         if(cfg.secs)$('#ptimer').textContent=fmt(Math.max(0,total-elapsed));
       }
       cycle++;
-      if(cfg.cycles){$('#ptimer').textContent=cycle+'/'+cfg.cycles+' cycles';if(cycle>=cfg.cycles)break;}
+      if(cfg.cycles){$('#ptimer').textContent=cycle+'/'+cfg.cycles;if(cycle>=cfg.cycles)break;}
       if(cfg.secs&&elapsed>=total)break;
     }
     if(!cancelled)finishPacer(e);
@@ -546,6 +587,8 @@ async function runPacer(e){
 function finishPacer(e){
   beep(880,0.18);vibe([30,40,30]);logSession(e.name);
   $('#phase').textContent='Terminé';$('#ptimer').textContent='✓';
+  var pc=$('#pcount');if(pc)pc.textContent='';
+  var ob=$('#orb');if(ob)ob.classList.remove('holding');
   $('#psub').textContent='Belle séance. Laisse la 1re respiration rester calme.';
   $('#orb').style.transform='scale(.7)';
   $('#pctrl').innerHTML='<button class="btn block primary" onclick="closePlayer()">Fermer</button>';
