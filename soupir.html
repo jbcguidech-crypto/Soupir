@@ -140,6 +140,12 @@ input[type=range]{accent-color:var(--teal)}
 .sheet .srow:last-of-type{border-bottom:none}
 .sheet .srow b{color:#f3a48f}
 .sheet .ic{flex:0 0 22px;height:22px;border-radius:50%;background:var(--dangerBg);border:1px solid #5a2c22;color:#f3a48f;display:grid;place-items:center;font-weight:700;font-size:13px}
+.installbar{position:fixed;top:0;left:0;right:0;z-index:60;max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(180deg,#1c3133,#17282a);border-bottom:1px solid var(--line2);box-shadow:0 6px 20px rgba(0,0,0,.4);animation:fade .3s ease}
+.installbar .ib-ic{width:30px;height:30px;border-radius:8px;flex:0 0 auto;background:radial-gradient(circle at 30% 30%,var(--teal),var(--teal2));box-shadow:0 0 12px var(--tealD)}
+.installbar .ib-tx{flex:1;font-size:12.5px;line-height:1.35;color:var(--ink)}
+.installbar .ib-tx b{font-family:"Fraunces",Georgia,serif}
+.installbar .ib-btn{background:linear-gradient(180deg,var(--teal),var(--tealD));color:#04201d;border:none;border-radius:9px;padding:8px 13px;font-weight:700;font-size:13px;white-space:nowrap}
+.installbar .ib-x{background:none;border:none;color:var(--faint);font-size:19px;padding:2px 6px;line-height:1}
 </style>
 </head>
 <body>
@@ -1036,6 +1042,28 @@ function safetyGate(force){
 }
 go('home');refreshChip();safetyGate();
 if('serviceWorker' in navigator && location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(function(){});}
+var deferredPrompt=null;
+function isStandalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+function isiOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent||'')&&!window.MSStream;}
+function showInstallBar(mode){
+  if(load('sf_installdismiss',false)||isStandalone())return;
+  if(document.querySelector('.installbar'))return;
+  var bar=el('div','installbar');
+  var txt=(mode==='ios')
+    ? '<b>Installer Souffle</b><br>Appuie sur Partager, puis « Sur l\u2019écran d\u2019accueil ».'
+    : '<b>Installer Souffle</b><br>Accès rapide et hors-ligne, comme une appli.';
+  var btn=(mode==='ios')?'':'<button class="ib-btn" id="ibInstall">Installer</button>';
+  bar.innerHTML='<div class="ib-ic"></div><div class="ib-tx">'+txt+'</div>'+btn+'<button class="ib-x" id="ibX" aria-label="Fermer">\u00d7</button>';
+  document.body.appendChild(bar);
+  document.getElementById('ibX').onclick=function(){save('sf_installdismiss',true);bar.remove();};
+  var ins=document.getElementById('ibInstall');
+  if(ins)ins.onclick=function(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;bar.remove();});}
+  };
+}
+window.addEventListener('beforeinstallprompt',function(ev){ev.preventDefault();deferredPrompt=ev;showInstallBar('prompt');});
+window.addEventListener('appinstalled',function(){var b=document.querySelector('.installbar');if(b)b.remove();save('sf_installdismiss',true);});
+setTimeout(function(){if(isiOS()&&!isStandalone())showInstallBar('ios');},900);
 </script>
 </body>
 </html>
