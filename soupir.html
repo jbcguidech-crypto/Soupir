@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f1a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Souffle · Respiration fonctionnelle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -760,6 +763,25 @@ function playReps(e){
   ctrl('<button class="btn block primary" id="b">Commencer la 1re série</button>');$('#b').onclick=startSet;
 }
 
+function exportData(){
+  var data={bolt:boltHist,sessions:sessions,metrics:metrics,settings:settings,v:1,exported:new Date().toISOString()};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='souffle-data-'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1200);
+}
+function importData(file){
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      if(d.bolt)boltHist=d.bolt;if(d.sessions)sessions=d.sessions;if(d.metrics)metrics=d.metrics;if(d.settings)settings=d.settings;
+      save('sf_bolt',boltHist);save('sf_sess',sessions);save('sf_metrics',metrics);save('sf_set',settings);
+      alert('Données importées.');go('track');refreshChip();
+    }catch(e){alert('Fichier invalide.');}
+  };
+  rd.readAsText(file);
+}
 function renderTrack(v){
   v.innerHTML='';
   v.appendChild(el('div','kicker','Progression'));
@@ -943,6 +965,11 @@ function renderInfo(v){
   $('#swSound').onclick=function(){settings.sound=!settings.sound;save('sf_set',settings);$('#swSound').classList.toggle('on',settings.sound);if(settings.sound)beep();};
   $('#swVibe').onclick=function(){settings.vibe=!settings.vibe;save('sf_set',settings);$('#swVibe').classList.toggle('on',settings.vibe);if(settings.vibe)vibe(30);};
   var _sb=el('button','btn sm ghost','Revoir les règles de sécurité');_sb.style.marginTop='12px';_sb.onclick=function(){safetyGate(true);};v.appendChild(_sb);
+  var _ex=el('button','btn sm ghost','Exporter mes données (JSON)');_ex.style.marginTop='8px';_ex.onclick=exportData;v.appendChild(_ex);
+  var _imw=el('div');_imw.style.marginTop='8px';
+  _imw.innerHTML='<label class="btn sm ghost" style="display:inline-flex;cursor:pointer">Importer des données<input id="impFile" type="file" accept="application/json" style="display:none"></label>';
+  v.appendChild(_imw);
+  var _if=document.getElementById('impFile');if(_if)_if.onchange=function(e){if(e.target.files[0])importData(e.target.files[0]);};
   v.appendChild(el('div','src','Sources : P. McKeown — Oxygen Advantage (BOLT, respiration nasale, légère, apnées) · cohérence ~0,1 Hz (Lehrer & Vaschillo) · soupir cyclique : Balban et al., Cell Reports Medicine 2023 · fredonnement/NO : Weitzberg & Lundberg 2002 · hypoventilation VHL : Précart, Woorons et al., Sports Med - Open 2025 · bande costale : feedback latéral (Functional Movement Systems).'));
   v.appendChild(el('div','disclaimer','Application pédagogique. Ne remplace pas un avis médical. Tes données restent sur cet appareil (stockage local).'));
 }
@@ -965,6 +992,7 @@ function safetyGate(force){
   o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
 }
 go('home');refreshChip();safetyGate();
+if('serviceWorker' in navigator && location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(function(){});}
 </script>
 </body>
 </html>
