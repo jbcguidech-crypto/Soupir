@@ -1,7 +1,7 @@
 {
   "name": "Souffle — Respiration fonctionnelle",
   "short_name": "Souffle",
-  "start_url": "./soupir.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
