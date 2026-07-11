@@ -192,8 +192,8 @@ function readiness(){
   if(s==null)return{phase:'—',deload:false,dropping:false,msg:'Fais ton test BOLT pour calibrer la journée.'};
   var t=boltTrend();var dropping=(t.dir==='baisse');var phase,msg;
   if(s<25){phase='A';msg='Phase A — fondations & récup. Priorité sommeil + nasal 24/7. Pas de table O₂ ni de VHL.';}
-  else if(s<30){phase='B';msg='Phase B — reprise progressive : légère + apnea walk, table CO₂ légère, VHL 1×/sem.';}
-  else if(s<40){phase='C';msg='Phase C — programme complet : table O₂, VHL 2-3×/sem, apnées plus longues.';}
+  else if(s<30){phase='B';msg='Phase B (Palier 2) — introduction de la table O₂ (accompagné, oxymètre, SpO₂ ≥ 85 %) + apnea walk, table CO₂, VHL. Progression en douceur.';}
+  else if(s<40){phase='C';msg='Phase C — programme complet : table O₂, VHL 2-3×/sem (dont haute intensité), apnées plus longues.';}
   else {phase='C+';msg='Optimal — maintien & perf. Re-teste l’apnée max de temps en temps.';}
   if(dropping&&s>=25){msg='BOLT en baisse : jour allégé conseillé aujourd’hui, même si ta zone le permettrait. On consolide.';}
   return{phase:phase,deload:(s<25||dropping),dropping:dropping,trend:t,msg:msg};
@@ -231,6 +231,7 @@ const CATS=[
   {id:'mov', name:'Apnée en mouvement', ic:'⚡', col:'#d65a40', desc:'Avancé · prudence'},
   {id:'found', name:'Fondations', ic:'⌂', col:'#2db6a4', desc:'Habitudes nasales'},
   {id:'band', name:'Bande costale', ic:'◍', col:'#2db6a4', desc:'Feedback diaphragme'},
+  {id:'mob', name:'Souplesse', ic:'✳', col:'#2db6a4', desc:'Diaphragme & côtes'},
 ];
 const EX=[
  {id:'bolt',cat:'eval',name:'Test BOLT',benefit:'Tolérance au CO₂ & qualité du souffle',
@@ -281,7 +282,7 @@ const EX=[
   freq:'1×/jour max (phases 2-3)', dose:'6–8 apnées · repos fixe', nowatch:'Durée d’apnée croissante ; repos constant',
   setup:'Assis ou allongé, immobile, au sec. Avancé : c’est la table qui fait baisser la SpO₂.',
   steps:['Choisis une apnée de départ (~50 % du max ou ton BOLT) et un repos <b>fixe</b>.','La durée d’apnée <b>augmente</b> à chaque tour ; le repos reste constant.','Respiration normale aux récups, jamais d’hyperventilation.','Stoppe aux contractions fortes — jamais jusqu’au malaise.'],
-  safety:'(!) C’est l’exercice le plus hypoxiant. 1 seule table/jour, jamais dans l’eau, idéalement accompagné. Avec oxymètre : limite la descente (pas sous ~80 %), ne la chasse pas. Stop au vertige.', player:'o2table'},
+  safety:'(!) C’est l’exercice le plus hypoxiant. 1 seule table/jour, jamais dans l’eau, idéalement accompagné. Avec oxymètre : limite la descente (pas sous ~85 %), ne la chasse pas. Stop au vertige.', player:'o2table'},
  {id:'coh',cat:'reg',name:'Cohérence 5,5–6/min',benefit:'↑ VRC · ↓ stress · récup · sommeil',
   freq:'1–2×/jour (+ si stress)', dose:'1 série de 5–10 min', nowatch:'~30 cycles lents et égaux',
   setup:'Assis ou allongé, respiration nasale et diaphragmatique.',
@@ -374,6 +375,22 @@ const EX=[
   steps:['Inspire lentement par le nez en poussant les côtes <b>vers l’extérieur</b>, contre la bande.','Garde poitrine et épaules calmes.','Expire lentement : la bande se relâche.'],
   safety:'Feedback, pas restriction : jamais au point de gêner le souffle.', player:'pacer',
   pacer:{kind:'teal',phases:[{l:'Inspire (pousse les côtes)',d:4,k:'in'},{l:'Expire (relâche)',d:6,k:'out'}],secs:120,note:'Sens les côtes s’ouvrir latéralement contre la bande.'}},
+ {id:'ribmob',cat:'mob',name:'Mobilité côtes & buste',benefit:'Souplesse thoracique · allonge l’apnée max',
+  freq:'2-3×/sem', dose:'2-3 min', nowatch:'~5-6 respirations lentes par côté',
+  setup:'Debout ou assis, détendu. Mouvements lents synchronisés au souffle.',
+  steps:['Inspire en levant un bras au-dessus de la tête.','Expire en t’inclinant doucement du côté opposé : ouvre les côtes.','Reviens à l’inspiration ; change de côté.','Ajoute quelques rotations lentes du buste, souffle continu.'],
+  safety:'Amplitude confortable, jamais de douleur.', player:'info'},
+ {id:'diadrop',cat:'mob',name:'Relâchement du diaphragme',benefit:'Détend le diaphragme · respiration plus ample',
+  freq:'1×/jour', dose:'3-5 min', nowatch:'~10 respirations ventrales très lentes',
+  setup:'Allongé sur le dos, genoux pliés, mains sous les dernières côtes.',
+  steps:['Respire dans le ventre : l’inspiration gonfle sous tes mains.','Expire lentement, longuement, en relâchant tout.','Sur quelques expirations, presse doucement sous le rebord costal pour relâcher le diaphragme.','Termine par une posture douce (posture de l’enfant) en respirant lentement.'],
+  safety:'Douceur : aucune pression douloureuse.', player:'info'},
+ {id:'mbt',cat:'eval',name:'Marche en apnée max (MBT)',benefit:'Benchmark hebdo de ta capacité d’apnée en mouvement',
+  freq:'1×/sem', dose:'1 apnée quasi-max', nowatch:'Compte les pas tenus (objectif en hausse)',
+  setup:'Dans la fenêtre où le nez est dégagé (après débouchage), à jeun, terrain plat, ACCOMPAGNÉ.',
+  steps:['Marche ~1 min en respiration nasale.','Expire normalement, pince le nez et marche en apnée.','Va jusqu’à une faim d’air FORTE (proche du max), sans aller au malaise.','Note les pas tenus. Récupère : 6 souffles nettoyants, reste calme.'],
+  safety:'Effort quasi-max : accompagné, jamais dans l’eau, stop au moindre vertige. Applique la règle du demi-BOLT si ton BOLT est bas.', player:'apnea',
+  apnea:{rounds:1,reduced:15,recover:60,walkPrep:true}},
 ];
 const EXPLAIN={
  bolt:"Mesure ta tolérance au CO₂ et la qualité de ton souffle. Plus le score monte, mieux tu supportes le manque d’air — donc plus tu respires efficacement, au repos comme à l’effort. C’est ta jauge quotidienne pour calibrer l’entraînement.",
@@ -400,7 +417,10 @@ const EXPLAIN={
  tape:"Idée de favoriser le nez la nuit — mais preuve limitée et risque d’asphyxie si le nez n’est pas dégagé. Priorité au nasal de jour ; à n’envisager qu’avec un avis médical.",
  nasex:"Garder le nez à l’effort facile/modéré développe l’économie et la tolérance au CO₂ à l’exercice. Ouvre la bouche seulement quand l’intensité devient vraiment élevée.",
  imt:"Renforcer les muscles inspiratoires contre une résistance (appareil) réduit leur coût en oxygène — utile en altitude et à l’effort. Distinct du travail CO₂.",
- band:"Une bande souple autour des côtes te donne un repère pour apprendre l’expansion latérale 360° : tu respires en poussant les côtes vers l’extérieur, poitrine et épaules calmes."
+ band:"Une bande souple autour des côtes te donne un repère pour apprendre l’expansion latérale 360° : tu respires en poussant les côtes vers l’extérieur, poitrine et épaules calmes.",
+ ribmob:"La souplesse des côtes et du buste laisse plus de place aux poumons et détend les tensions qui raccourcissent l’apnée. Chez toi, c’est le levier le mieux établi pour allonger l’apnée max — plus que forcer sur le CO₂.",
+ diadrop:"Un diaphragme souple et relâché respire plus amplement et se contracte moins vite en apnée. Le relâchement compte autant que la force : c’est un travail de détente, pas d’effort.",
+ mbt:"Le MBT mesure ta capacité réelle d’apnée en mouvement, distincte du BOLT (qui reflète surtout ta sensibilité au CO₂). Comme c’est un effort quasi-max, c’est un stimulus : une fois par semaine, dans la fenêtre où le nez est dégagé, accompagné."
 };
 function exById(id){return EX.find(e=>e.id===id);}
 function exByCat(c){return EX.filter(e=>e.cat===c);}
@@ -456,9 +476,9 @@ function renderHome(v){
 function suggestRoutine(s){
   if(s==null)return['bolt','light','coh'];
   if(readiness().deload)return['bolt','light','coh','unblock'];
-  if(s<30)return['bolt','light','apnea','coh'];
-  if(s<40)return['bolt','light','apnea','co2table','478'];
-  return['bolt','light','apnea','co2table','vhl'];
+  if(s<30)return['bolt','light','apnea','o2table','coh'];
+  if(s<40)return['bolt','light','apnea','co2table','o2table'];
+  return['bolt','light','apnea','o2table','vhl'];
 }
 
 function renderCats(v){
@@ -906,7 +926,7 @@ function renderProg(v){
    {t:'Phase 2 · Tolérance à l’hypoxie (sem. 5-8)',
     goal:'Apnées plus longues + apnée dynamique (jogging/corde à sauter) : c’est ici qu’apparaît la désaturation qui compte. Oxymètre de pouls conseillé.',
     week:['<b>2×</b> « table O₂ » : 6-8 apnées, repos <b>fixe</b> (~2 min), durée <b>croissante</b>','<b>1-2×</b> Table CO₂ (entretien)','<b>2×</b> apnée dynamique : jogging léger ou corde, apnées 20→35 s, récup complète','1 test max/sem (accompagné)'],
-    target:'Apnée max ~2:30-3:30 · SpO₂ sous contrôle, descente <b>modérée</b> (jamais sous ~80 %, jamais en solo)'},
+    target:'Apnée max ~2:30-3:30 · SpO₂ sous contrôle, descente <b>modérée</b> (jamais sous ~85 %, jamais en solo)'},
    {t:'Phase 3 · Consolidation & intensité (sem. 9-12)',
     goal:'Apnées longues et intenses + VHL haute intensité : le profil « long et intense » que la recherche associe à la réponse EPO. Maintien et réévaluation.',
     week:['<b>2×</b> séance longue : montée en apnées max + table O₂','<b>2×</b> VHL haute intensité (app · jump squat/burpees) ou apnée dynamique','<b>1×</b> récupération : cohérence / soupir / respiration légère','Réévalue BOLT + apnée max en fin de cycle'],
@@ -922,7 +942,7 @@ function renderProg(v){
   });
   const m=el('div','block');
   m.innerHTML='<div class="field-t">Repères & suivi</div><div class="muted">'+
-    '<b>Oxymètre</b> (phases 2-3) : pour <b>limiter</b> la désaturation, pas la chasser — pas sous ~80 %, jamais en solo.<br>'+
+    '<b>Oxymètre</b> (phases 2-3) : pour <b>limiter</b> la désaturation, pas la chasser — pas sous ~85 %, jamais en solo.<br>'+
     '<b>Progression</b> : ~+10 % de charge/semaine, 1 semaine allégée toutes les 4.<br>'+
     '<b>Récupération</b> : sommeil, hydratation, fer/ferritine (un bilan sanguin est utile si tu vises l’hémato).<br>'+
     'Si le BOLT chute ou que la fatigue s’installe : allège.</div>';
@@ -1000,6 +1020,12 @@ function renderInfo(v){
   const epo=el('div','block');
   epo.innerHTML='<div class="field-t">EPO &amp; altitude — au juste</div><div class="muted">L’EPO est surtout déclenchée par l’<b>hypoxie</b> (rein, voie HIF). La voie fiable = <b>altitude</b> réelle ou simulée. L’<b>apnée</b> provoque une contraction de la rate (↑ hémoglobine transitoire) et une hausse d’EPO jusqu’à ~5 h après l’effort — mais de façon nette seulement avec des apnées <b>longues et intenses</b>, chez des pratiquants <b>expérimentés</b>. Tes apnées courtes (VHL) donnent surtout des gains <b>métaboliques</b> (CO₂/lactate, RSA), pas un vrai gain hématologique durable.</div>';
   v.appendChild(epo);
+  var _poly=el('div','block');
+  _poly.innerHTML='<div class="field-t">Nez bouché (polypose) : débouche d’abord</div><div class="muted">La respiration nasale continue n’est pas possible telle quelle : <b>débouche</b> (le CO₂ rouvre le nez), puis capitalise sur la fenêtre dégagée pour la respiration légère et la cohérence. Vise ~3 débouchages/jour (matin, midi, fin d’après-midi) et ~30 min de légère. Le suivi ORL reste indispensable — ce cadre gère les symptômes, il ne traite pas la polypose.</div>';
+  v.appendChild(_poly);
+  var _hb=el('div','block');
+  _hb.innerHTML='<div class="field-t">Micro-mouvements pendant l’apnée</div><div class="muted">Pendant une apnée longue, de petits mouvements respiratoires « à vide » calment l’envie de respirer (réflexe de Hering-Breuer). <b>Micro-inspire</b> : soulage le mieux mais regonfle un peu → réduit le stimulus altitude ⇒ à réserver aux séries max / tolérance CO₂. <b>Micro-expire</b> : effet moindre mais <b>préserve la désaturation</b> ⇒ compatible exhale-hold / altitude. Déglutir soulage aussi.</div>';
+  v.appendChild(_hb);
   const pb=el('button','btn block primary','Programme apnée (12 semaines)');pb.style.marginTop='12px';pb.onclick=()=>go('prog');
   v.appendChild(pb);
   v.appendChild(el('div','src','Réf. EPO/apnée : de Bruijn 2008 (+24 % EPO) · Elia/Kjeld 2015-2019 (élites) · Bouten 2019-2025 (rate, revue) · Précart/Woorons 2025 (VHL).'));
