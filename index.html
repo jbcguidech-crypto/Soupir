@@ -1005,10 +1005,12 @@ function renderTrack(v){
   }
   v.appendChild(sparkCard('Apnée max (s)',metrics.map(function(m){return m.apnea!=null?m.apnea:null;}),'s','#2db6a4'));
   v.appendChild(sparkCard('SpO₂ min (%)',metrics.map(function(m){return m.spo2!=null?m.spo2:null;}),'%','#e0922f'));
+  v.appendChild(sparkCard('Sommeil (h)',metrics.map(function(m){return m.sommeil!=null?m.sommeil:null;}),'h','#4fb89e'));
   var tm=todayMetric()||{};
   var _ist='width:82px;text-align:right;background:var(--card2);border:1px solid var(--line2);border-radius:8px;color:var(--ink);padding:6px;font-family:inherit;font-size:14px';
   var form=el('div','card');form.style.marginTop='12px';
   form.innerHTML='<div class="field-t">Journal du jour</div>'+
+    '<div class="kv"><span>Sommeil (h)</span><input id="mSl" type="number" step="0.5" min="0" value="'+(tm.sommeil!=null?tm.sommeil:'')+'" style="'+_ist+'"></div>'+
     '<div class="kv"><span>Apnée max (s)</span><input id="mAp" type="number" inputmode="numeric" value="'+(tm.apnea!=null?tm.apnea:'')+'" style="'+_ist+'"></div>'+
     '<div class="kv"><span>SpO₂ min (%)</span><input id="mSp" type="number" inputmode="numeric" value="'+(tm.spo2!=null?tm.spo2:'')+'" style="'+_ist+'"></div>'+
     '<div class="kv"><span>Faim d’air (1-5)</span><input id="mAir" type="number" inputmode="numeric" min="1" max="5" value="'+(tm.air!=null?tm.air:'')+'" style="'+_ist+'"></div>'+
@@ -1017,10 +1019,38 @@ function renderTrack(v){
   v.appendChild(form);
   msb.onclick=function(){
     function num(id){var x=document.getElementById(id).value;return x===''?null:+x;}
-    var o={},a=num('mAp'),sp=num('mSp'),ai=num('mAir'),rp=num('mRpe');
-    if(a!=null)o.apnea=a;if(sp!=null)o.spo2=sp;if(ai!=null)o.air=ai;if(rp!=null)o.rpe=rp;
+    var o={},a=num('mAp'),sp=num('mSp'),ai=num('mAir'),rp=num('mRpe'),sl=num('mSl');
+    if(a!=null)o.apnea=a;if(sp!=null)o.spo2=sp;if(ai!=null)o.air=ai;if(rp!=null)o.rpe=rp;if(sl!=null)o.sommeil=sl;
     saveMetric(o);beep(740,0.12);vibe(30);go('track');
   };
+  // corrélation sommeil <-> BOLT
+  var _bm={};boltHist.forEach(function(b){_bm[b.t]=b.s;});
+  var _pairs=metrics.filter(function(m){return m.sommeil!=null&&_bm[m.t]!=null;}).map(function(m){return {sl:m.sommeil,b:_bm[m.t]};});
+  if(_pairs.length>=4){
+    var _sls=_pairs.map(function(x){return x.sl;}).sort(function(a,b){return a-b;});
+    var _med=_sls[Math.floor(_sls.length/2)];
+    var _avg=function(arr){return arr.length?Math.round(arr.reduce(function(a,x){return a+x.b;},0)/arr.length*10)/10:'—';};
+    var _hi=_pairs.filter(function(x){return x.sl>=_med;}),_lo=_pairs.filter(function(x){return x.sl<_med;});
+    var _cc=el('div','card');_cc.style.marginTop='12px';
+    _cc.innerHTML='<div class="field-t">Sommeil ↔ BOLT</div><div class="muted">Sur '+_pairs.length+' jours avec les deux données :<br>Nuits longues (≥ '+_med+' h) → BOLT moyen <b style="color:var(--ink)">'+_avg(_hi)+' s</b><br>Nuits courtes (< '+_med+' h) → BOLT moyen <b style="color:var(--ink)">'+_avg(_lo)+' s</b></div>';
+    v.appendChild(_cc);
+  }
+  // récap 7 derniers jours (depuis le dernier BOLT)
+  if(boltHist.length){
+    var _last=new Date(boltHist[boltHist.length-1].t),_lim=new Date(_last.getTime()-6*86400000);
+    var _inw=function(t){var d=new Date((t||'').slice(0,10));return d>=_lim&&d<=_last;};
+    var _wk=boltHist.filter(function(b){return _inw(b.t);}).map(function(b){return b.s;});
+    var _wavg=_wk.length?Math.round(_wk.reduce(function(a,x){return a+x;},0)/_wk.length*10)/10:'—';
+    var _wmin=_wk.length?Math.min.apply(null,_wk):'—',_wmax=_wk.length?Math.max.apply(null,_wk):'—';
+    var _sess=sessions.filter(function(x){return _inw(x.t);}),_days={};_sess.forEach(function(x){_days[(x.t||'').slice(0,10)]=1;});
+    var _wc=el('div','card');_wc.style.marginTop='12px';
+    _wc.innerHTML='<div class="field-t">Récap · 7 derniers jours</div>'+
+      '<div class="kv"><span>BOLT moyen</span><b>'+_wavg+' s</b></div>'+
+      '<div class="kv"><span>Min / Max</span><b>'+_wmin+' / '+_wmax+' s</b></div>'+
+      '<div class="kv"><span>Séances</span><b>'+_sess.length+'</b></div>'+
+      '<div class="kv" style="border-bottom:none"><span>Jours actifs</span><b>'+Object.keys(_days).length+' / 7</b></div>';
+    v.appendChild(_wc);
+  }
   v.appendChild(el('div','section-t','Séances récentes'));
   if(sessions.length){
     sessions.slice(-12).reverse().forEach(function(s){
@@ -1193,7 +1223,7 @@ function safetyGate(force){
   o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
 }
 if(settings.light&&document.body)document.body.classList.add('light');
-var APP_VERSION='1.2';
+var APP_VERSION='1.3';
 var _v=document.getElementById('ver');if(_v)_v.textContent='v'+APP_VERSION;
 var wakeLock=null;
 async function requestWake(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}}
