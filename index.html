@@ -422,6 +422,18 @@ const EX=[
   steps:['Marche en continu par le nez.','Expire, pince le nez et marche en apnée jusqu’à une faim d’air moyenne à forte.','Relâche mais CONTINUE de marcher en respiration réduite — tu ne t’arrêtes jamais.','Enchaîne ~5 apnées sans pause debout.'],
   safety:'Réservé aux personnes en bonne santé. Jamais dans l’eau, sol plat, stop au moindre vertige.', player:'apnea',
   apnea:{rounds:5,reduced:20,recover:25,walkPrep:true}},
+ {id:'recovend',cat:'reg',name:'Récupération — endurance',benefit:'Retour au calme après un effort long · parasympathique',
+  freq:'après un effort long', dose:'5-10 min', nowatch:'~30-50 cycles lents',
+  setup:'Après une sortie longue (trail, alpi). Assis ou allongé, nasal, épaules basses.',
+  steps:['Reviens à la respiration nasale, sans gober l’air.','Inspire ~5,5 s, expire ~5,5 s, régulier.','Laisse la fréquence cardiaque redescendre toute seule.','5-10 min, puis hydrate-toi et refais tes stocks.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire',d:5.5,k:'in'},{l:'Expire',d:5.5,k:'out'}],secs:360,note:'Après l’endurance, le souffle lent accélère le retour au parasympathique.'}},
+ {id:'recovint',cat:'reg',name:'Récupération — effort intense',benefit:'Après workout / mouvements explosifs · lactate puis calme',
+  freq:'après un effort intense', dose:'~5 min actif + 5 min souffle', nowatch:'Marche facile, puis souffle lent',
+  setup:'Après un workout, VHL haute intensité, sprints. Deux temps : récup active légère, puis respiration lente.',
+  steps:['D’abord 3-5 min de marche / jogging / vélo FACILES : ça évacue le lactate plus vite qu’assis.','Puis assieds-toi et lance la respiration lente pour faire redescendre le sympathique.','Inspire 4 s, retiens 7 s, expire 8 s.','~5 min ; reste nasal, ne sur-respire pas.'],
+  safety:null, player:'pacer',
+  pacer:{kind:'teal',phases:[{l:'Inspire (nez)',d:4,k:'in'},{l:'Retiens',d:7,k:'hold'},{l:'Expire (bouche)',d:8,k:'out'}],cycles:6,note:'Fais d’abord 3-5 min de récup active légère, puis ce souffle lent.'}},
 ];
 const EXPLAIN={
  bolt:"Mesure ta tolérance au CO₂ et la qualité de ton souffle. Plus le score monte, mieux tu supportes le manque d’air — donc plus tu respires efficacement, au repos comme à l’effort. C’est ta jauge quotidienne pour calibrer l’entraînement.",
@@ -454,7 +466,9 @@ const EXPLAIN={
  mbt:"Le MBT mesure ta capacité réelle d’apnée en mouvement, distincte du BOLT (qui reflète surtout ta sensibilité au CO₂). Comme c’est un effort quasi-max, c’est un stimulus : une fois par semaine, dans la fenêtre où le nez est dégagé, accompagné.",
  warmup:"Une série de petites apnées de 5 s entrecoupées de respiration normale : ça relève légèrement le CO₂ et prépare le corps avant une séance, sans fatigue. À garder facile — c’est un échauffement.",
  hast:"La simulation d’altitude : des apnées répétées pendant la marche font descendre l’oxygène du sang vers des niveaux proches de la moyenne altitude, ce qui entraîne ta tolérance à l’hypoxie sans matériel. La reprise en respiration réduite prolonge l’effet ; en jogging, la désaturation est plus marquée.",
- sharkfit:"Même principe que la simulation d’altitude, mais tu ne t’arrêtes jamais : tu continues de marcher pendant la récupération. La charge cardio s’ajoute à l’hypoxie répétée — nettement plus intense, d’où la bonne santé requise."
+ sharkfit:"Même principe que la simulation d’altitude, mais tu ne t’arrêtes jamais : tu continues de marcher pendant la récupération. La charge cardio s’ajoute à l’hypoxie répétée — nettement plus intense, d’où la bonne santé requise.",
+ recovend:"Après un effort long, le système nerveux redescend surtout tout seul — la respiration lente (~6/min) accélère le retour au parasympathique et améliore le sommeil. La priorité reste calme, hydratation, apport.",
+ recovint:"Après un effort intense, il y a un fort pic sympathique et du lactate. Quelques minutes de mouvement léger évacuent le lactate plus vite qu’au repos ; puis la respiration lente rappelle le sympathique encore élevé. C’est là que le souffle aide le plus."
 };
 function exById(id){return EX.find(e=>e.id===id);}
 function exByCat(c){return EX.filter(e=>e.cat===c);}
@@ -1259,7 +1273,7 @@ function safetyGate(force){
   o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
 }
 if(settings.light&&document.body)document.body.classList.add('light');
-var APP_VERSION='1.5';
+var APP_VERSION='1.6';
 var _v=document.getElementById('ver');if(_v)_v.textContent='v'+APP_VERSION;
 var wakeLock=null;
 async function requestWake(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}}
