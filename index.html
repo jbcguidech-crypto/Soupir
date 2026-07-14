@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0f1a1a">
+<meta name="theme-color" content="#eef3f2">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-v2-192.png">
+<link rel="icon" href="icon-v2-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>OA 2.0 · Respiration fonctionnelle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1245,12 +1245,10 @@ function renderInfo(v){
   v.appendChild(el('div','section-t','Réglages'));
   const sset=el('div','block');
   sset.innerHTML='<div class="toggle"><span>Sons (bips de phase)</span><div class="sw '+(settings.sound?'on':'')+'" id="swSound"></div></div>'+
-    '<div class="toggle"><span>Vibrations</span><div class="sw '+(settings.vibe?'on':'')+'" id="swVibe"></div></div>'+
-    '<div class="toggle" style="border-bottom:none"><span>Thème clair</span><div class="sw '+(settings.light?'on':'')+'" id="swLight"></div></div>';
+    '<div class="toggle" style="border-bottom:none"><span>Vibrations</span><div class="sw '+(settings.vibe?'on':'')+'" id="swVibe"></div></div>';
   v.appendChild(sset);
   $('#swSound').onclick=function(){settings.sound=!settings.sound;save('sf_set',settings);$('#swSound').classList.toggle('on',settings.sound);if(settings.sound)beep();};
   $('#swVibe').onclick=function(){settings.vibe=!settings.vibe;save('sf_set',settings);$('#swVibe').classList.toggle('on',settings.vibe);if(settings.vibe)vibe(30);};
-  $('#swLight').onclick=function(){settings.light=!settings.light;save('sf_set',settings);$('#swLight').classList.toggle('on',settings.light);document.body.classList.toggle('light',settings.light);};
   var _sb=el('button','btn sm ghost','Revoir les règles de sécurité');_sb.style.marginTop='12px';_sb.onclick=function(){safetyGate(true);};v.appendChild(_sb);
   var _ex=el('button','btn sm ghost','Exporter mes données (JSON)');_ex.style.marginTop='8px';_ex.onclick=exportData;v.appendChild(_ex);
   var _imw=el('div');_imw.style.marginTop='8px';
@@ -1278,7 +1276,7 @@ function safetyGate(force){
   document.body.appendChild(o);
   o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
 }
-if(settings.light&&document.body)document.body.classList.add('light');
+if(document.body)document.body.classList.add('light');
 var APP_VERSION='2.0';
 var _v=document.getElementById('ver');if(_v)_v.textContent='v'+APP_VERSION;
 var wakeLock=null;
