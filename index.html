@@ -176,6 +176,7 @@ body.light .brand .ver{color:var(--faint)}
     <button data-nav="track" onclick="go('track')"><span class="ni">⤴</span>Suivi</button>
     <button data-nav="info" onclick="go('info')"><span class="ni">𝒾</span>Méthode</button>
     <button data-nav="altitude" onclick="go('altitude')"><span class="ni">⛰</span>Altitude</button>
+    <button data-nav="apnea" onclick="go('apnea')"><span class="ni">⏱</span>Apnée</button>
   </div>
 </div>
 <div id="playerRoot"></div>
@@ -191,6 +192,8 @@ let metrics=load('sf_metrics',[]);
 let timers=load('sf_timers',{});
 let altWeeks=load('sf_altweeks',12);
 let altLevel=load('sf_altlevel','confirme');
+let apWeeks=load('sf_apweeks',12);
+let apLevel=load('sf_aplevel','confirme');
 function todayMetric(){return metrics.filter(function(m){return m.t===todayISO();})[0];}
 function saveMetric(o){var m=todayMetric();if(!m){m={t:todayISO()};metrics.push(m);}for(var k in o)m[k]=o[k];if(metrics.length>400)metrics=metrics.slice(-400);save('sf_metrics',metrics);}
 function logApnea(v){if(!v)return;var m=todayMetric();var cur=(m&&m.apnea)?m.apnea:0;saveMetric({apnea:Math.max(cur,v)});}
@@ -497,6 +500,7 @@ function go(where,arg){
   else if(where==='prog'){renderProg(v);setNav('info');}
   else if(where==='sport'){renderSport(v);setNav('home');}
   else if(where==='altitude'){renderAltitude(v);setNav('altitude');}
+  else if(where==='apnea'){renderApnea(v);setNav('apnea');}
   window.scrollTo(0,0);refreshChip();
 }
 function refreshChip(){
@@ -1134,6 +1138,93 @@ function renderAltitude(v){
     });
   });
   v.appendChild(el('div','src','Programme personnel de préparation à l’altitude (usage perso et clients). Pédagogique, ne remplace pas un avis médical. Apnées : respecter les règles de sécurité.'));
+}
+var APNEA={
+ 8:[
+  {no:1,name:'Fondations & relâchement',goal:'Base + tolérance CO₂',weeks:[
+   {label:'Semaine 1',focus:'Calibration',items:[{n:'BOLT baseline',p:'3 matins, retiens la moyenne',ex:'bolt'},{n:'Rétention max de référence',p:'assis, à froid — ta base',ex:'retmax'},{n:'Respiration légère',p:'nasale · 2×/j · 5-10 min',ex:'light'}]},
+   {label:'Semaine 2',focus:'Tolérance CO₂',items:[{n:'Table CO₂',p:'½ max · repos 90→60→45→30 s · 6 cycles',ex:'co2table'},{n:'Souplesse côtes + diaphragme',p:'5-10 min',ex:'ribmob'}]},
+   {label:'Semaine 3',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Volume −20 %',p:'on ancre'}]}]},
+  {no:2,name:'CO₂ & hypoxie',goal:'Tables O₂, densité, expiration',weeks:[
+   {label:'Semaine 4',focus:'Tables O₂',items:[{n:'Table O₂',p:'rétention +10 s/cycle · repos 2 min · 6 cycles · plancher SpO₂ 85 %',ex:'o2table'},{n:'Apnea walk',p:'6 × · récup complète',ex:'apnea'}]},
+   {label:'Semaine 5',focus:'Expiration + densité',items:[{n:'Apnées sur expiration',p:'bas volume · douces · 4-6 rép · faim d’air modérée',ex:'expmax'},{n:'Table CO₂ dense',p:'repos 45→20 s · 8 cycles',ex:'co2table'}]},
+   {label:'Semaine 6',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Volume −20 %'}]}]},
+  {no:3,name:'Apnées longues',goal:'Max + affûtage',weeks:[
+   {label:'Semaine 7',focus:'Apnées max',items:[{n:'Séance d’apnées max',p:'warm-up → 4-5 apnées max · récup complète · SpO₂ 82 %',ex:'retmax'}]},
+   {label:'Semaine 8',focus:'Affûtage',items:[{n:'Volume −50 %',p:'cohérence + respiration légère',ex:'coh'},{n:'Bilan',p:'compare BOLT et apnée max début vs fin'}]}]}
+ ],
+ 12:[
+  {no:1,name:'Fondations & relâchement',goal:'Base ventilatoire, tolérance CO₂, relâchement',weeks:[
+   {label:'Semaine 1',focus:'Calibration',items:[{n:'BOLT baseline',p:'3 matins, retiens la moyenne',ex:'bolt'},{n:'Rétention max de référence',p:'assis, à froid — ta base',ex:'retmax'},{n:'Respiration légère',p:'nasale · 2×/j · 5-10 min',ex:'light'}]},
+   {label:'Semaine 2',focus:'Tolérance CO₂',items:[{n:'Table CO₂',p:'½ max · repos 90→60→45→30 s · 6 cycles',ex:'co2table'},{n:'Souplesse côtes + diaphragme',p:'5-10 min',ex:'ribmob'}]},
+   {label:'Semaine 3',focus:'Relâchement',items:[{n:'Cohérence 5-5',p:'6 min',ex:'coh'},{n:'Échauffement petites apnées',p:'~10 × 5 s',ex:'warmup'},{n:'Respiration légère',p:'4 × 4 min',ex:'light'}]},
+   {label:'Semaine 4',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Semaine allégée',p:'volume −30 %'}]}]},
+  {no:2,name:'CO₂ & hypoxie',goal:'Tables O₂, densité CO₂, apnées sur expiration',weeks:[
+   {label:'Semaine 5',focus:'Tables O₂',items:[{n:'Table O₂',p:'rétention +10 s/cycle · repos 2 min fixe · 6 cycles · plancher SpO₂ 85 %',ex:'o2table'},{n:'Apnea walk',p:'6 × · récup complète',ex:'apnea'}]},
+   {label:'Semaine 6',focus:'Densité CO₂',items:[{n:'Table CO₂ dense',p:'½ max · repos 45→20 s · 8 cycles',ex:'co2table'},{n:'Souplesse',p:'côtes + diaphragme',ex:'ribmob'}]},
+   {label:'Semaine 7',focus:'Apnées sur expiration',items:[{n:'Apnées sur expiration',p:'bas volume · assis · douces · 4-6 rép · faim d’air modérée',ex:'expmax'},{n:'Table O₂',p:'7 cycles · SpO₂ 84 %',ex:'o2table'}]},
+   {label:'Semaine 8',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Semaine allégée',p:'−30 %'}]}]},
+  {no:3,name:'Apnées longues & consolidation',goal:'Apnées max, hypoxie, affûtage',weeks:[
+   {label:'Semaine 9',focus:'Apnées longues',items:[{n:'Séance d’apnées max',p:'warm-up structuré → 4-5 apnées max · récup complète · SpO₂ 82 %',ex:'retmax'},{n:'Table CO₂ légère',ex:'co2table'}]},
+   {label:'Semaine 10',focus:'Hypoxie + mouvement',items:[{n:'Marche en apnée max (MBT)',p:'benchmark',ex:'mbt'},{n:'Table O₂ dense',p:'8 cycles · SpO₂ 82 %',ex:'o2table'}]},
+   {label:'Semaine 11',focus:'Pic',items:[{n:'Séance repère',p:'warm-up → tentative de record perso à sec · accompagné',ex:'retmax'}]},
+   {label:'Semaine 12',focus:'Affûtage',items:[{n:'Volume −50 %',p:'cohérence + respiration légère',ex:'coh'},{n:'Bilan',p:'compare BOLT et apnée max début vs fin'}]}]}
+ ],
+ 16:[
+  {no:1,name:'Fondations & relâchement',goal:'Base ventilatoire, tolérance CO₂, relâchement',weeks:[
+   {label:'Semaine 1',focus:'Calibration',items:[{n:'BOLT baseline',p:'3 matins, moyenne',ex:'bolt'},{n:'Rétention max de référence',p:'assis, à froid',ex:'retmax'},{n:'Respiration légère',p:'2×/j · 5-10 min',ex:'light'}]},
+   {label:'Semaine 2',focus:'Tolérance CO₂',items:[{n:'Table CO₂',p:'½ max · repos 90→60→45→30 s · 6 cycles',ex:'co2table'},{n:'Souplesse côtes + diaphragme',ex:'ribmob'}]},
+   {label:'Semaine 3',focus:'Relâchement',items:[{n:'Cohérence 5-5',p:'6 min',ex:'coh'},{n:'Échauffement petites apnées',p:'~10 × 5 s',ex:'warmup'},{n:'Respiration légère',p:'4 × 4 min',ex:'light'}]},
+   {label:'Semaine 4',focus:'Densité CO₂ douce',items:[{n:'Table CO₂',p:'½ max · repos 45 s fixe · 8 cycles',ex:'co2table'},{n:'Respiration légère',p:'4 × 5 min',ex:'light'}]},
+   {label:'Semaine 5',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Semaine allégée',p:'−30 %'}]}]},
+  {no:2,name:'CO₂ & hypoxie',goal:'Tables O₂, densité CO₂, apnées sur expiration',weeks:[
+   {label:'Semaine 6',focus:'Tables O₂',items:[{n:'Table O₂',p:'+10 s/cycle · repos 2 min · 6 cycles · SpO₂ 85 %',ex:'o2table'},{n:'Apnea walk',p:'6 ×',ex:'apnea'}]},
+   {label:'Semaine 7',focus:'Densité CO₂',items:[{n:'Table CO₂ dense',p:'repos 45→20 s · 8 cycles',ex:'co2table'},{n:'Souplesse',ex:'ribmob'}]},
+   {label:'Semaine 8',focus:'Apnées sur expiration',items:[{n:'Apnées sur expiration',p:'bas volume · douces · 4-6 rép',ex:'expmax'},{n:'Table O₂',p:'7 cycles · SpO₂ 84 %',ex:'o2table'}]},
+   {label:'Semaine 9',focus:'O₂ + marche',items:[{n:'Table O₂',p:'8 cycles · SpO₂ 84 %',ex:'o2table'},{n:'Apnea walk',p:'8 ×',ex:'apnea'}]},
+   {label:'Semaine 10',focus:'Volume + relâchement',items:[{n:'Relâchement du diaphragme',p:'5-10 min',ex:'diadrop'},{n:'Apnées sur expiration',p:'6 rép',ex:'expmax'}]},
+   {label:'Semaine 11',focus:'Consolidation',items:[{n:'Re-test BOLT + rétention max',ex:'retmax'},{n:'Semaine allégée',p:'−30 %'}]}]},
+  {no:3,name:'Apnées longues & consolidation',goal:'Apnées max, hypoxie, transfert, affûtage',weeks:[
+   {label:'Semaine 12',focus:'Apnées longues',items:[{n:'Séance d’apnées max',p:'warm-up → 4-5 apnées max · récup complète · SpO₂ 82 %',ex:'retmax'},{n:'Table CO₂ légère',ex:'co2table'}]},
+   {label:'Semaine 13',focus:'Hypoxie + mouvement',items:[{n:'Marche en apnée max (MBT)',ex:'mbt'},{n:'Table O₂ dense',p:'8 cycles · SpO₂ 82 %',ex:'o2table'}]},
+   {label:'Semaine 14',focus:'Transfert',items:[{n:'Apnées dynamiques douces à sec / marche',p:'RPE modéré',ex:'apnea'}]},
+   {label:'Semaine 15',focus:'Pic',items:[{n:'Séance repère',p:'warm-up → record perso à sec · accompagné',ex:'retmax'}]},
+   {label:'Semaine 16',focus:'Affûtage',items:[{n:'Volume −50 %',p:'cohérence + respiration légère',ex:'coh'},{n:'Bilan',p:'BOLT et apnée max début vs fin'}]}]}
+ ]
+};
+function renderApnea(v){
+  v.innerHTML='';
+  v.appendChild(el('div','kicker','Programme'));
+  v.appendChild(el('h1','h-hero display','Apnée'));
+  v.appendChild(el('p','lead','Construire l’apnée à sec : tolérance CO₂, hypoxie, relâchement et souplesse. Réglable selon le temps devant toi.'));
+  var sel=el('div','row');sel.style.marginBottom='6px';
+  [8,12,16].forEach(function(w){var b=el('button','btn sm'+(apWeeks===w?' primary':' ghost'),w+' sem');b.style.flex='1';b.onclick=function(){apWeeks=w;save('sf_apweeks',w);go('apnea');};sel.appendChild(b);});
+  v.appendChild(sel);
+  v.appendChild(el('div','muted',{8:'Condensé — préparation rapprochée (3 / 3 / 2 semaines).',12:'Standard — la référence (4 / 4 / 4).',16:'Étendu — progression douce, plus de densité (5 / 6 / 5).'}[apWeeks]));
+  var lvl=el('div','row');lvl.style.margin='10px 0 2px';
+  [['confirme','Confirmé'],['debutant','Débutant']].forEach(function(o){var b=el('button','btn sm'+(apLevel===o[0]?' primary':' ghost'),o[1]);b.style.flex='1';b.onclick=function(){apLevel=o[0];save('sf_aplevel',o[0]);go('apnea');};lvl.appendChild(b);});
+  v.appendChild(lvl);
+  if(apLevel==='debutant'){var bb=el('div','safety');bb.style.marginTop='8px';bb.innerHTML='<b>Mode débutant.</b> Plancher SpO₂ jamais sous 85 %, densités allégées. Pas d’apnée max ni d’apnée sur expiration forte tant que le BOLT n’est pas stable au-dessus de 25. On progresse d’abord par la durée.';v.appendChild(bb);}
+  var saf=el('div','safety');saf.style.marginTop='10px';
+  saf.innerHTML='<b>Non négociable.</b> Tout à sec, sur la terre ferme. Jamais d’apnée dans l’eau sans encadrement freediving certifié. Jamais d’hyperventilation avant une apnée. Apnées max : accompagné, stop aux fortes contractions. SpO₂ = plancher, jamais cible. Récup : 6 souffles nettoyants, reste assis 15 s.';
+  v.appendChild(saf);
+  (APNEA[apWeeks]||APNEA[12]).forEach(function(bk){
+    v.appendChild(el('div','section-t','Bloc '+bk.no+' · '+bk.name));
+    var g=el('div','muted');g.style.margin='-6px 2px 8px';g.textContent=bk.goal;v.appendChild(g);
+    bk.weeks.forEach(function(wk){
+      var c=el('div','card');c.style.marginBottom='10px';
+      c.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b class="display" style="font-size:16px">'+wk.label+'</b><span class="muted" style="font-size:12px">'+wk.focus+'</span></div>';
+      wk.items.forEach(function(it){
+        var pp=(apLevel==='debutant')?beginnerize(it.p):it.p;
+        var row=el('div');row.style.cssText='margin-top:8px;padding-top:8px;border-top:1px solid var(--line)';
+        row.innerHTML='<div><b>'+it.n+'</b></div>'+(pp?'<div class="muted" style="font-size:12.5px;margin-top:2px">'+pp+'</div>':'');
+        if(it.ex&&exById(it.ex)){var lb=el('button','btn sm ghost','▶ '+exById(it.ex).name);lb.style.marginTop='6px';lb.onclick=(function(id){return function(){go('detail',id);};})(it.ex);row.appendChild(lb);}
+        c.appendChild(row);
+      });
+      v.appendChild(c);
+    });
+  });
+  v.appendChild(el('div','src','Programme d’apnée à sec (usage perso et clients). Pédagogique, ne remplace pas une formation freediving certifiée ni un avis médical.'));
 }
 function renderTrack(v){
   v.innerHTML='';
