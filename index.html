@@ -510,6 +510,14 @@ function refreshChip(){
   $('#chipZone').style.color=z.c;
 }
 
+function backupDue(){
+  var n=boltHist.length+sessions.length+metrics.length;
+  if(n<5)return 0;
+  var last=load('sf_lastbackup',null);
+  if(!last)return n;
+  var days=Math.floor((new Date(todayISO())-new Date(last))/86400000);
+  return days>=14?days:0;
+}
 function renderHome(v){
   const s=lastBolt(),z=boltZone(s);v.innerHTML='';
   v.appendChild(el('div','kicker','Respiration fonctionnelle'));
@@ -523,6 +531,17 @@ function renderHome(v){
     '<button class="btn primary block" onclick="go(\'detail\',\'bolt\')">'+(s==null?'Faire le test':'Re-tester')+'</button>'+
     '<button class="btn block" onclick="go(\'track\')">Historique</button></div>';
   v.appendChild(c);
+  var _bd=backupDue();
+  if(_bd){
+    var _bk=el('div','card');_bk.style.cssText='margin-top:12px;border-left:3px solid var(--amber)';
+    var _lb=load('sf_lastbackup',null);
+    _bk.innerHTML='<div class="field-t" style="color:var(--amber)">Sauvegarde conseillée</div><div class="muted">'+(_lb?('Dernière sauvegarde il y a '+_bd+' jours.'):'Tes données ne sont stockées que sur cet appareil et n’ont jamais été sauvegardées.')+' Exporte-les pour ne rien perdre.</div>';
+    var _br=el('div','row');_br.style.marginTop='10px';
+    var _be=el('button','btn sm amber','Exporter maintenant');_be.style.flex='1';_be.onclick=function(){exportData();go('home');};
+    var _bl=el('button','btn sm ghost','Plus tard');_bl.style.flex='1';_bl.onclick=function(){save('sf_lastbackup',todayISO());go('home');};
+    _br.appendChild(_be);_br.appendChild(_bl);_bk.appendChild(_br);
+    v.appendChild(_bk);
+  }
   var _r=readiness();
   if(lastBolt()!=null){
     var _bc=_r.deload?'#e0922f':'#2db6a4';
@@ -1021,10 +1040,14 @@ function playReps(e){
 }
 
 function exportData(){
-  var data={bolt:boltHist,sessions:sessions,metrics:metrics,settings:settings,v:1,exported:new Date().toISOString()};
+  var data={bolt:boltHist,sessions:sessions,metrics:metrics,settings:settings,
+    timers:timers,retmax:load('sf_retmax',null),expmax:load('sf_expmax',null),
+    altWeeks:altWeeks,altLevel:altLevel,apWeeks:apWeeks,apLevel:apLevel,
+    v:2,exported:new Date().toISOString()};
+  save('sf_lastbackup',todayISO());
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);var a=document.createElement('a');
-  a.href=url;a.download='souffle-data-'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();
+  a.href=url;a.download='OA-sauvegarde-'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();
   setTimeout(function(){URL.revokeObjectURL(url);},1200);
 }
 function importData(file){
@@ -1034,6 +1057,13 @@ function importData(file){
       var d=JSON.parse(rd.result);
       if(d.bolt)boltHist=d.bolt;if(d.sessions)sessions=d.sessions;if(d.metrics)metrics=d.metrics;if(d.settings)settings=d.settings;
       save('sf_bolt',boltHist);save('sf_sess',sessions);save('sf_metrics',metrics);save('sf_set',settings);
+      if(d.timers){timers=d.timers;save('sf_timers',timers);}
+      if(d.retmax!=null)save('sf_retmax',d.retmax);
+      if(d.expmax!=null)save('sf_expmax',d.expmax);
+      if(d.altWeeks){altWeeks=d.altWeeks;save('sf_altweeks',altWeeks);}
+      if(d.altLevel){altLevel=d.altLevel;save('sf_altlevel',altLevel);}
+      if(d.apWeeks){apWeeks=d.apWeeks;save('sf_apweeks',apWeeks);}
+      if(d.apLevel){apLevel=d.apLevel;save('sf_aplevel',apLevel);}
       alert('Données importées.');go('track');refreshChip();
     }catch(e){alert('Fichier invalide.');}
   };
