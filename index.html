@@ -183,7 +183,7 @@ body.light .brand .ver{color:var(--faint)}
 <body>
 <div class="app">
   <div class="bar">
-    <div class="brand"><span class="dot"></span> OA 2.0</div>
+    <div class="brand"><span class="dot"></span> OA 2.0 <span class="ver" id="ver"></span></div>
     <button class="boltchip" onclick="go('detail','bolt')">
       <span>BOLT</span><b id="chipBolt">—</b><small id="chipZone"></small>
     </button>
@@ -1527,7 +1527,7 @@ function safetyGate(force){
   o.querySelector('#ackBtn').onclick=function(){save('sf_safety',true);o.remove();};
 }
 if(document.body)document.body.classList.add('light');
-var APP_VERSION='2.0';
+var APP_VERSION='2.1';
 var _v=document.getElementById('ver');if(_v)_v.textContent='v'+APP_VERSION;
 var wakeLock=null;
 async function requestWake(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}}
