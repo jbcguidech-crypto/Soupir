@@ -39,7 +39,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   padding:7px 12px;border-radius:999px;font-size:13px}
 .boltchip b{font-family:"Fraunces";font-size:15px}
 .boltchip small{color:var(--mut);font-size:11px}
-.view{flex:1;padding:6px 18px 120px;animation:fade .35s ease}
+.view{flex:1;padding:6px 18px 132px;animation:slidein .32s cubic-bezier(.22,.9,.35,1)}
+@keyframes slidein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .kicker{color:var(--teal);font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:600}
 .lead{color:var(--mut);font-size:14px;line-height:1.55}
@@ -116,12 +117,19 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .counters b{display:block;font-family:"Fraunces";font-size:22px;color:var(--ink)}
 .pctrl{padding:16px 22px calc(26px + env(safe-area-inset-bottom));display:flex;gap:12px}
 .note-amber{color:var(--amber)} .note-teal{color:var(--teal)}
-.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;max-width:560px;margin:0 auto;
-  background:linear-gradient(rgba(15,26,26,.5),var(--bg));backdrop-filter:blur(10px);border-top:1px solid var(--line);
-  display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--faint);font-size:10.5px;font-weight:600;padding:6px}
-.nav button.on{color:var(--teal)}
+.nav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:14px;right:14px;z-index:30;max-width:532px;margin:0 auto;
+  background:rgba(23,40,42,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--line2);border-radius:26px;box-shadow:0 12px 32px rgba(0,0,0,.35);
+  display:flex;justify-content:space-around;gap:2px;padding:7px}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);
+  font-size:10.5px;font-weight:600;padding:7px 2px;min-height:48px;border-radius:19px;transition:background .2s,color .2s}
+.nav button.on{color:var(--teal);background:rgba(45,182,164,.14)}
+.nav button:active{transform:scale(.95)}
 .nav .ni{font-size:19px;line-height:1}
+.seg{display:flex;background:var(--card2);border:1px solid var(--line2);border-radius:14px;padding:4px;margin:2px 0 12px}
+.seg button{flex:1;padding:10px 8px;border-radius:10px;font-weight:700;font-size:14px;color:var(--mut);transition:background .2s,color .2s}
+.seg button.on{background:linear-gradient(180deg,var(--teal),var(--tealD));color:#04201d}
+@media (prefers-reduced-motion: reduce){.view,.player{animation:none}.orb{transition-duration:0s !important}}
 .spark{display:flex;align-items:flex-end;gap:4px;height:64px;margin-top:10px}
 .spark .b{flex:1;background:linear-gradient(var(--teal),var(--teal2));border-radius:4px 4px 0 0;min-height:4px;position:relative}
 .spark .b small{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--mut)}
@@ -154,10 +162,21 @@ input[type=range]{accent-color:var(--teal)}
 body.light{--bg:#eef3f2;--bg2:#e4edeb;--card:#ffffff;--card2:#eef4f2;--ink:#15302e;--mut:#5a726f;--faint:#8299a5;--line:rgba(0,0,0,.09);--line2:rgba(0,0,0,.16);--shadow:0 8px 24px rgba(20,60,58,.10)}
 body.light .app{background:radial-gradient(1200px 500px at 50% -10%, #dcece9 0%, var(--bg) 60%)}
 body.light .bar{background:linear-gradient(var(--bg),rgba(238,243,242,.7))}
-body.light .nav{background:linear-gradient(rgba(238,243,242,.5),var(--bg))}
+body.light .nav{background:rgba(255,255,255,.85);box-shadow:0 12px 32px rgba(20,60,58,.14)}
+body.light .nav button.on{background:rgba(45,182,164,.16)}
 body.light .player{background:radial-gradient(800px 500px at 50% 18%, #dcece9, var(--bg) 70%)}
 body.light .installbar{background:linear-gradient(180deg,#ffffff,#eef4f2)}
 body.light .orb-count{color:#04201d;text-shadow:0 1px 3px rgba(255,255,255,.5)}
+body.light .safety{background:#fdeceb;border:1px solid #f0c2bb;color:#8a3524}
+body.light .safety b{color:#b3402a}
+body.light .orb-prog{background:conic-gradient(var(--teal) 0%, rgba(20,60,58,.10) 0)}
+body.light .orb-ring{border-color:rgba(20,60,58,.16)}
+body.light .sw{background:#d7e2df;border-color:rgba(0,0,0,.14)}
+body.light .sw::after{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+body.light .btn.primary,body.light .btn.amber{color:#06231f}
+body.light .search{background:#fff}
+body.light .spark .b small{color:var(--mut)}
+body.light .disclaimer,body.light .src{color:#7b8f8c}
 body.light .brand .ver{color:var(--faint)}
 </style>
 </head>
@@ -175,8 +194,7 @@ body.light .brand .ver{color:var(--faint)}
     <button data-nav="cats" onclick="go('cats')"><span class="ni">≋</span>Exercices</button>
     <button data-nav="track" onclick="go('track')"><span class="ni">⤴</span>Suivi</button>
     <button data-nav="info" onclick="go('info')"><span class="ni">𝒾</span>Méthode</button>
-    <button data-nav="altitude" onclick="go('altitude')"><span class="ni">⛰</span>Altitude</button>
-    <button data-nav="apnea" onclick="go('apnea')"><span class="ni">⏱</span>Apnée</button>
+    <button data-nav="prog2" onclick="go('prog2')"><span class="ni">⛰</span>Programmes</button>
   </div>
 </div>
 <div id="playerRoot"></div>
@@ -499,8 +517,9 @@ function go(where,arg){
   else if(where==='info'){renderInfo(v);setNav('info');}
   else if(where==='prog'){renderProg(v);setNav('info');}
   else if(where==='sport'){renderSport(v);setNav('home');}
-  else if(where==='altitude'){renderAltitude(v);setNav('altitude');}
-  else if(where==='apnea'){renderApnea(v);setNav('apnea');}
+  else if(where==='prog2'){go(load('sf_progtab','altitude'));return;}
+  else if(where==='altitude'){save('sf_progtab','altitude');renderAltitude(v);setNav('prog2');}
+  else if(where==='apnea'){save('sf_progtab','apnea');renderApnea(v);setNav('prog2');}
   window.scrollTo(0,0);refreshChip();
 }
 function refreshChip(){
@@ -1131,6 +1150,9 @@ function beginnerize(p){
 }
 function renderAltitude(v){
   v.innerHTML='';
+  var _seg=el('div','seg');
+  [['altitude','⛰ Altitude'],['apnea','⏱ Apnée']].forEach(function(o){var b=el('button',(o[0]==='altitude')?'on':'',o[1]);b.onclick=function(){go(o[0]);};_seg.appendChild(b);});
+  v.appendChild(_seg);
   v.appendChild(el('div','kicker','Préparation'));
   v.appendChild(el('h1','h-hero display','Prépa Altitude'));
   v.appendChild(el('p','lead','Tolérance CO₂, adaptation ventilatoire et économie d’O₂ — sans matériel, à la maison. Réglable selon le temps devant toi.'));
@@ -1224,6 +1246,9 @@ var APNEA={
 };
 function renderApnea(v){
   v.innerHTML='';
+  var _seg=el('div','seg');
+  [['altitude','⛰ Altitude'],['apnea','⏱ Apnée']].forEach(function(o){var b=el('button',(o[0]==='apnea')?'on':'',o[1]);b.onclick=function(){go(o[0]);};_seg.appendChild(b);});
+  v.appendChild(_seg);
   v.appendChild(el('div','kicker','Programme'));
   v.appendChild(el('h1','h-hero display','Apnée'));
   v.appendChild(el('p','lead','Construire l’apnée à sec : tolérance CO₂, hypoxie, relâchement et souplesse. Réglable selon le temps devant toi.'));
